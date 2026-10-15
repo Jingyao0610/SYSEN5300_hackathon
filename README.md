@@ -1,1 +1,1 @@
-# SYSEN5300_hackathon
+Cornell SYSEN 5300 Six Sigma Hackathon project — Hayden Yang
