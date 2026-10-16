@@ -656,3 +656,187 @@ This list is a source-code audit, not an executed browser acceptance test.
 Update the mock fixtures to the same schema so mocked development and real integration exercise
 the same rendering paths. Confirm the three-row example and K1/K3 through the actual API with
 mock mode disabled before reporting H-04 complete.
+
+## 11. Executable handoff cases and integration acceptance
+
+Shifeng's H-03 handoff supplies **nine deterministic SYNTHETIC cases**, each as a complete request,
+the verified core's expected response, and a CSV. These are integration fixtures; Jingyao still
+owns the H-02 demonstration datasets and their codebook. Generate a fresh bundle from the repo root:
+
+```bash
+python tests/fixtures/qc/export_handoff.py
+```
+
+The command prints its output folder. The [fixture guide](../tests/fixtures/qc/README.md) explains
+`--output` and the no-overwrite behavior. The bundle contains 28 files, including `manifest.json`.
+The exporter checks core results only; its manifest explicitly records HTTP/UI verification as false.
+
+| Case ID | Monitoring total / late | Expected point status | Limits | Formal signals |
+|---|---|---|---|---|
+| `k1_high` | 100 / 20 | `high` | 0.01, 0.19 | 1 |
+| `k1_boundary` | 100 / 19 | `no_signal` | 0.01, 0.19 | 0 |
+| `k3_high` | 400 / 59 | `high` | 0.055, 0.145 | 1 |
+| `k3_boundary` | 400 / 58 | `no_signal` | 0.055, 0.145 | 0 |
+| `insufficient` | 49 / 5 | `insufficient_data` | null, null | 0 |
+| `unreviewed` | 100 / 20 | `unreviewed_baseline` | 0.01, 0.19 | 0 |
+| `current_day` | 100 / 20 | `provisional_current_day` | 0.01, 0.19 | 0 |
+| `small_3_2_1` | 1 / 1 | `insufficient_data` | null, null | 0 |
+| `empty` | No point | No point | No point | 0 |
+
+The first seven cases use a 20-day baseline of 200 late / 2,000 usable responses, zone A, priority P1,
+target 10 minutes and cutoff `2026-09-21T00:00:00-04:00`. Their observation cutoff is
+`2026-10-01T00:00:00-04:00`, except `current_day`, which uses `2026-09-21T12:00:00-04:00`.
+Only `unreviewed` clears the review confirmation among these seven. Always use the exact settings
+in each request or manifest, including those for the small and empty cases. The small case has
+3 imported rows, 2 usable rows and 1 exclusion; only one usable row is in monitoring.
+
+### Julian: compare actual HTTP responses when the backend is available
+
+Start the real backend using its documented startup command. In Git Bash, with Python and curl
+available, run the following. Enter the generated bundle folder using a path such as `C:/...`.
+The second prompt accepts the complete analysis endpoint, including `/analyze`, without printing it.
+Use a fresh export folder for each acceptance run so earlier `.actual.json` files cannot be mistaken
+for results from this run. These commands are a handoff procedure, **not a record of completed HTTP tests**.
+
+```bash
+read -r -p "Fresh handoff folder: " QC_HANDOFF
+export QC_HANDOFF
+read -r -s -p "Complete analysis endpoint: " ANALYZE_URL
+printf '\n'
+for case in k1_high k1_boundary k3_high k3_boundary insufficient unreviewed current_day small_3_2_1 empty
+do
+  code=$(curl --silent --show-error \
+    -H 'Content-Type: application/json' \
+    --data-binary "@$QC_HANDOFF/$case.request.json" \
+    --output "$QC_HANDOFF/$case.actual.json" \
+    --write-out '%{http_code}' "$ANALYZE_URL")
+  if [ "$?" -ne 0 ] || [ "$code" != "200" ]; then
+    printf 'FAIL %s: expected HTTP 200, received %s\n' "$case" "$code"
+    break
+  fi
+  printf 'HTTP 200: %s\n' "$case"
+done
+unset ANALYZE_URL
+```
+
+All nine valid envelopes should return HTTP 200, including empty/insufficient inputs. Resolve any
+transport failure before running the comparison below. It requires every response and checks the
+complete shape and values, with absolute numeric tolerance `1e-12` rather than JSON text equality:
+
+```bash
+python - <<'PY'
+import json
+import math
+import os
+from pathlib import Path
+
+folder = Path(os.environ['QC_HANDOFF'])
+manifest = json.loads((folder / 'manifest.json').read_text(encoding='utf-8'))
+
+def compare(expected, actual, path):
+    if isinstance(expected, dict):
+        assert isinstance(actual, dict) and expected.keys() == actual.keys(), path
+        for key in expected:
+            compare(expected[key], actual[key], f'{path}.{key}')
+    elif isinstance(expected, list):
+        assert isinstance(actual, list) and len(expected) == len(actual), path
+        for index, (left, right) in enumerate(zip(expected, actual)):
+            compare(left, right, f'{path}[{index}]')
+    elif isinstance(expected, (int, float)) and not isinstance(expected, bool):
+        assert isinstance(actual, (int, float)) and not isinstance(actual, bool), path
+        assert math.isfinite(actual) and math.isclose(expected, actual, rel_tol=0, abs_tol=1e-12), path
+    else:
+        assert type(actual) is type(expected) and actual == expected, path
+
+for case in manifest['cases']:
+    name = case['name']
+    expected = json.loads((folder / case['files']['expected']).read_text(encoding='utf-8'))
+    actual = json.loads((folder / f'{name}.actual.json').read_text(encoding='utf-8'))
+    compare(expected, actual, name)
+    print(f'PASS: {name} response matches the verified core')
+print(f"PASS: all {len(manifest['cases'])} responses match")
+PY
+```
+
+This successful-response comparison supplements the 422/error and validation tests in section 8;
+it does not replace them. Julian records real command output and the tested commit when available.
+
+### Pingchuan: check the same cases in the real browser flow
+
+1. Disable mock mode and import a case's `.records.csv`. Apply its exact priority, target, baseline
+   cutoff and `as_of`. Importing data or changing settings may clear review confirmations; restore
+   `reviewed_zones` last, and leave it empty for `unreviewed`.
+2. If the UI has no fixed observation-cutoff control, provide an explicit test mechanism agreed
+   with Julian. Do not replace a historical cutoff with today's clock and claim the current-day
+   case matched: it would test a different state.
+3. Compare the displayed counts, rates, limits, status, reasons, signals and coverage with the
+   expected response. K1 limits display as 1% and 19%; K3 as 5.5% and 14.5%. The equality cases
+   must not signal after display rounding. Inspect the network response to confirm unrounded values.
+4. Check the small case's 3/2/1 accounting and exclusion explanation. The empty case must present
+   no result, not an invented zero rate. Insufficient, unreviewed and provisional cases must remain
+   explicit and produce no formal signals. Confirm timezone, target and observation cutoff are visible.
+5. Record actual results below and attach evidence in the team's H-04 review. The nine fixtures
+   support numerical integration checks; H-04 also requires the remaining section 8 checks and one
+   H-02 dataset to agree with the core.
+
+The header-only `empty` CSV is an exception to the ordinary import/settings sequence: it contains
+no priority to select, and the browser may prevent submission of an empty record list. Verify the
+empty request through HTTP separately and verify the browser's no-data state. If an empty POST
+must be exercised through the UI, H-04 needs an explicit test entry point; do not assume it exists.
+
+| Acceptance evidence | Current state | Record after execution |
+|---|---|---|
+| Nine exported core cases and CSV round trips | PASS; verified locally | 15,252 data rows; 28 exported files |
+| Core definition of done | PASS; independently reviewed | `112 passed in 0.74s` |
+| Nine actual HTTP responses | Pending | Tested commit, operator, date, command output |
+| Browser cases with mock disabled | Pending | Frontend/backend commits, operator, visible values and evidence |
+| H-02 demonstration dataset parity | Pending dataset/integration | Dataset, exact settings, matching numbers |
+| H-01 human method walkthrough | Pending | Participants, date, unresolved explanations |
+
+## 12. Shifeng's English method walkthrough
+
+This is rehearsal material for the team and a contribution to the eventual demonstration. It does
+not certify that teammates have understood the method or that API/browser integration has passed.
+
+### A 75-90 second explanation
+
+> We are Chinese Can Fly. Our project is designed to help ambulance dispatch supervisors identify
+> unusual changes in late completed responses, separately for each zone and priority category.
+>
+> We use synthetic dispatch and arrival records. A response is late only when its duration exceeds
+> the user's operational target. Our ten-minute example is illustrative, not a clinical standard.
+>
+> We use a daily p chart because each response is either late or on time, and daily sample sizes can
+> differ. The baseline is total late responses divided by total completed responses, not an average
+> of daily percentages.
+>
+> With 200 late responses among 2,000 baseline responses, the baseline rate is ten percent. For a
+> monitoring day with 100 responses, the limits are one and nineteen percent: twenty late responses
+> signal high; nineteen do not. With 400 responses, the limits narrow to 5.5 and 14.5 percent.
+>
+> These signals require a reviewed baseline, sufficient data, and a completed day. Missing or invalid
+> records remain visible as exclusions. The analysis supports investigation; it does not identify
+> causes or make clinical decisions.
+
+### Five likely questions
+
+| Question | Answer to explain in your own words |
+|---|---|
+| Why a p chart? | Each usable response has a binary late/on-time outcome. We monitor daily proportions while accounting for different daily sample sizes, separately for comparable zone/priority groups. |
+| Why weight the baseline? | Each response is an observation. A day with 6/100 late and a day with 34/300 late together give 40/400 = 10%. Averaging their percentages gives about 8.67% and gives the smaller day equal weight. The full test repeats these two patterns across 20 days. |
+| How is the target different from the control limits? | The target is minutes per response; the limits are proportions of late responses relative to historical performance. A stable process may still have an unacceptable late proportion. |
+| What assumptions matter? | Responses should be approximately independent and the baseline should be stable and comparable within each group. Daily/weekday diagnostics support human review. Our 20-day minimum and expected counts of at least five are project policy/approximation conditions, not proof of these assumptions. |
+| What can the result not tell us? | It covers usable recorded completed responses, not every call or outstanding dispatch. Exclusions may bias the rate; the current day is provisional. A signal identifies a change to investigate, not its cause or a clinical decision. |
+
+### Five-minute team walkthrough
+
+| Time | Shifeng leads; teammates explain back |
+|---|---|
+| 0:00-1:00 | Each person gives the method in their own words: compare each closed day's late proportion with limits from that zone's reviewed historical baseline, within one priority. |
+| 1:00-2:00 | Explain why exactly 10 minutes is on time but 10 minutes plus one second is late. Work through the weighted 6/100 + 34/300 example above. |
+| 2:00-3:00 | Explain K1: 0.10 baseline, n=100, standard error 0.03, limits 0.01 and 0.19; 19 does not signal and 20 does. Then n=400 gives standard error 0.015 and limits 0.055 and 0.145; 58 does not signal and 59 does, when all eligibility conditions hold. |
+| 3:00-4:00 | Explain why an unreviewed baseline, fewer than 20 baseline days, an absent/degenerate baseline, no usable day data, inadequate expected counts, or the current day prevents a formal verdict. At p_bar=0.10, n=49 fails the expected-late check; n=50 passes that check alone. |
+| 4:00-5:00 | Explain coverage bias, independence/comparability assumptions, and why signals do not establish causation. Record actual participants and any unresolved explanation before changing the H-01 status. |
+
+Until every teammate can explain the method without reading, H-01 remains `in_progress`.
+The verified core and fixtures are already available for H-04 work while the walkthrough is pending.

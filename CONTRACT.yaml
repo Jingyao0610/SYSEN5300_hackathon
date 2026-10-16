@@ -29,7 +29,7 @@ tasks:
     title: Fill in every FILL IN line in SPEC.md
     points: "15 - Tool Design: scope matches a prompt (5), clear user and use case (5), minimal inputs (5)"
     status: in_progress
-    owner: "Chinese Can Fly (team walkthrough)"
+    owner: "Shifeng Hong + Codex (preparation); team walkthrough pending"
     started_at: "2026-10-16 15:22 -04:00"
     owns: ["SPEC.md", "docs/plan.md", "docs/team.md", "docs/team.en.md", "docs/interfaces.md"]
     notes: >
@@ -44,7 +44,7 @@ tasks:
       grep -c "FILL IN[.,]" SPEC.md prints 0 (it counts only the blanks,
       not the instructions at the top), and every teammate can say the
       method sentence in SPEC section 4 without reading it.
-    result: "SPEC filled and interfaces v1.0 released for H-04; blanks 0, JSON examples parse and verified core matches the schema. Team method walkthrough remains pending."
+    result: "SPEC blanks 0; interfaces v1.0 includes nine-case integration procedure, English explanation, judge Q&A and team walkthrough. JSON, shell syntax, offline comparator and ledger checks pass. Human method acceptance and H-04 HTTP/UI checks remain pending."
 
   - id: H-02
     title: Two or three test datasets plus a codebook
