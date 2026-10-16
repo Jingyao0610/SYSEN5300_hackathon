@@ -49,15 +49,20 @@ tasks:
   - id: H-02
     title: Two or three test datasets plus a codebook
     points: "10 - Tool Documentation: 2-3 working test datasets (5), codebook and README for the data (5)"
-    status: todo
-    owner: "Jingyao"
-    started_at: ""
+    status: in_progress
+    owner: "Jingyao; Shifeng Hong supplemental dataset contribution"
+    started_at: "2026-10-16 17:41 -04:00"
     owns: ["data/"]
+    notes: >
+      Shifeng authorized publication of his separately validated synthetic bundle
+      on 2026-10-16. Keep it under data/shifeng_synthetic/ without replacing
+      Jingyao's candidate datasets or Hayden's real-data extract. Canonical
+      dataset selection and H-02 acceptance remain pending.
     definition_of_done: >
       ls data/*.csv lists 2 or 3 files (e.g. in control, planted shift, edge
       case), and data/README.md names every one of them and describes every
       column with units and how the data would be collected for real.
-    result: ""
+    result: "Supplemental Shifeng bundle: 3 synthetic CSVs (12000/12000/2934 rows), codebook, generator and validation evidence; initial core checks and 6/6 local HTTP parity passed. Publication does not mark canonical H-02 acceptance done."
 
   - id: H-03
     title: Core QC statistic as one plain, tested function

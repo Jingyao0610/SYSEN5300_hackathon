@@ -1,0 +1,112 @@
+{
+  "schema_version": "1.0",
+  "synthetic": true,
+  "seed": 5300,
+  "timezone": "America/New_York",
+  "notice": "Entirely invented demonstration records. No patient, call, or third-party dataset is used.",
+  "generation": {
+    "scope": "Illustrative volumes and distributions, not empirical service assumptions.",
+    "random_engine": "Python standard-library random.Random(5300)",
+    "days": [
+      "2026-09-01",
+      "2026-09-30"
+    ],
+    "zones": [
+      "A",
+      "B"
+    ],
+    "priorities": [
+      "P1",
+      "P2"
+    ],
+    "responses_per_zone_priority_day": 100,
+    "baseline_dates": [
+      "2026-09-01",
+      "2026-09-20"
+    ],
+    "dispatch_window_local": [
+      "08:00:00",
+      "20:00:00"
+    ],
+    "duration_seconds_inclusive": {
+      "on_time": [
+        120,
+        600
+      ],
+      "late": [
+        601,
+        1800
+      ]
+    },
+    "stable_late_probability": 0.15,
+    "shifted_late_probability": 0.35,
+    "shift_scope": "Only A/P1 dispatched September 21-30; only arrival timestamps can differ.",
+    "coupling": "One latent uniform draw and both candidate durations per row are shared by stable and shift.",
+    "seed_policy": "Seed fixed before inspection; retain any naturally occurring false alarms.",
+    "edge_policy": "Deterministic hand-counted fixtures; random generation rules do not apply to edge_cases.csv."
+  },
+  "datasets": {
+    "stable.csv": {
+      "description": "Unchanged generating conditions; false alarms remain possible.",
+      "available_priorities": [
+        "P1",
+        "P2"
+      ],
+      "settings": {
+        "target_minutes": 10,
+        "selected_priority": "P1",
+        "baseline_end": "2026-09-21T00:00:00-04:00",
+        "reviewed_zones": [
+          "A",
+          "B"
+        ],
+        "as_of": "2026-10-01T00:00:00-04:00"
+      }
+    },
+    "zone_shift.csv": {
+      "description": "Same baseline and all other records; A/P1 monitoring probability rises to .35.",
+      "available_priorities": [
+        "P1",
+        "P2"
+      ],
+      "settings": {
+        "target_minutes": 10,
+        "selected_priority": "P1",
+        "baseline_end": "2026-09-21T00:00:00-04:00",
+        "reviewed_zones": [
+          "A",
+          "B"
+        ],
+        "as_of": "2026-10-01T00:00:00-04:00"
+      }
+    },
+    "edge_cases.csv": {
+      "description": "Boundary, sparse, degenerate, current-day, new-zone, and invalid-row fixtures.",
+      "available_priorities": [
+        "P1",
+        "P2"
+      ],
+      "priority_note": "P2 appears only on one excluded duplicate copy; selecting P2 returns empty analysis with coverage.",
+      "settings": {
+        "target_minutes": 10,
+        "selected_priority": "P1",
+        "baseline_end": "2026-09-21T00:00:00-04:00",
+        "reviewed_zones": [
+          "A",
+          "B",
+          "C",
+          "NEW",
+          "SHORT"
+        ],
+        "as_of": "2026-10-01T12:00:00-04:00"
+      },
+      "inspectable_ids": [
+        "SYN-E-EXACT-TARGET",
+        "SYN-E-TARGET-PLUS-ONE-SECOND",
+        "SYN-E-CROSS-MIDNIGHT",
+        "SYN-E-EXCLUDED-DAY",
+        "SYN-E-DUPLICATE"
+      ]
+    }
+  }
+}
