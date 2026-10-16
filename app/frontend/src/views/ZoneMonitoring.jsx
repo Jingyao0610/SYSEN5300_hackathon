@@ -16,7 +16,7 @@ function chartRows(base, monitoring, withBaseline) {
 
 const cellClass = (s) => (s === 'high' ? 'hi' : s === 'low' ? 'lo' : s === 'no_signal' ? 'ok' : 'na')
 
-export default function ZoneMonitoring({ res, busy, source, onToggleReviewed, onConfirmAll, onViewIncidents, onBack }) {
+export default function ZoneMonitoring({ res, busy, source, onToggleReviewed, onConfirmAll, onViewIncidents, onBack, backLabel = '← Back to data' }) {
   const zones = useMemo(() => (res ? res.zone_baselines.map((b) => b.zone) : []), [res])
   const [picked, setPicked] = useState('')
   const [focusDate, setFocusDate] = useState('')
@@ -27,7 +27,7 @@ export default function ZoneMonitoring({ res, busy, source, onToggleReviewed, on
     return (
       <section className="panel">
         <p>No current analysis. Load records and run it on the Data &amp; Settings page.</p>
-        <button onClick={onBack}>← Back to data</button>
+        <button onClick={onBack}>{backLabel}</button>
       </section>
     )
   }
@@ -37,7 +37,7 @@ export default function ZoneMonitoring({ res, busy, source, onToggleReviewed, on
         <p className="notice">
           {res.quality.reasons.map(reasonText).join(' ') || 'No zones to show.'} Nothing is charted, and no rate is shown as zero.
         </p>
-        <button onClick={onBack}>← Back to data</button>
+        <button onClick={onBack}>{backLabel}</button>
       </section>
     )
   }
@@ -64,7 +64,8 @@ export default function ZoneMonitoring({ res, busy, source, onToggleReviewed, on
   if (highCount(lead) > 0) title = `${lead} is running late more often than its own baseline`
   else if (zones.some((z) => lowCount(z) > 0)) title = `${zones.find((z) => lowCount(z) > 0)} is running late less often than its own baseline`
   else if (needReview.length) title = 'Review each baseline to unlock verdicts'
-  else title = 'No zone crossed its control limits'
+  else if (!res.daily_points.some((p) => statusInfo(p.status).formal)) title = 'No completed-day verdicts yet'
+  else title = 'No formal control-chart signals'
 
   // the day shown in the "slowest arrivals" panel
   const zoneSignals = signalsOf(zone)
@@ -101,8 +102,10 @@ export default function ZoneMonitoring({ res, busy, source, onToggleReviewed, on
       {needReview.length > 0 && (
         <p className="callout warn">
           <b>Baseline review needed:</b> {needReview.join(', ')}. Until a zone&rsquo;s baseline is confirmed, its days
-          show &ldquo;Baseline not reviewed&rdquo; instead of a verdict. Check each baseline in the panel below, or
-          {' '}<button className="primary" disabled={busy} onClick={onConfirmAll}>Confirm all usable baselines</button>
+          show &ldquo;Baseline not reviewed&rdquo; instead of a verdict. Check each baseline in the panel below.
+          {onConfirmAll && (
+            <> Or <button className="primary" disabled={busy} onClick={onConfirmAll}>Confirm all usable baselines</button>.</>
+          )}
         </p>
       )}
 
@@ -115,8 +118,8 @@ export default function ZoneMonitoring({ res, busy, source, onToggleReviewed, on
           const tag = hi ? ['hi', `${hi} high day${hi > 1 ? 's' : ''}`]
             : lo ? ['lo', `${lo} low day${lo > 1 ? 's' : ''}`]
             : b.status === 'unreviewed_baseline' ? ['wait', 'needs review']
-            : b.status === 'insufficient_data' ? ['na', 'no verdicts']
-            : ['ok', 'no signals']
+            : b.status === 'insufficient_data' || !pts.some((p) => statusInfo(p.status).formal) ? ['na', 'no verdicts']
+            : ['ok', 'no formal signals']
           const rates = pts.map((p) => p.rate).filter((r) => r != null)
           const rMin = Math.min(...rates), rMax = Math.max(...rates)
           const sx = (i) => (pts.length < 2 ? 50 : (i / (pts.length - 1)) * 100)
@@ -166,7 +169,7 @@ export default function ZoneMonitoring({ res, busy, source, onToggleReviewed, on
                 {zones.map((z) => <option key={z} value={z}>{z}</option>)}
               </select>
             </label>
-            <button onClick={onBack}>← Back to data</button>
+            <button onClick={onBack}>{backLabel}</button>
           </div>
           <PChart points={rows} pBar={base.p_bar} zone={zone} selected={day}
             onPick={(p) => setFocusDate(p.date)}

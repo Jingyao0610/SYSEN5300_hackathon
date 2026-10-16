@@ -24,7 +24,8 @@ async function request(path, options) {
   let res
   try {
     res = await fetch(`${API_URL}${path}`, options)
-  } catch {
+  } catch (error) {
+    if (options?.signal?.aborted) throw error
     throw new ApiError(0, { message: `Cannot reach the API at ${API_URL}. Is the backend running?` })
   }
   let body = null
@@ -47,12 +48,13 @@ export function health() {
  * POST /analyze with the six v1.0 fields. Every statistic in the response is
  * computed by app/qc.py on the server; this file only moves JSON.
  */
-export async function analyze(req, mockScenario) {
+export async function analyze(req, mockScenario, { signal } = {}) {
   if (MOCK) return (await loadMock()).mockAnalyze(req, mockScenario)
   return request('/analyze', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(req),
+    signal,
   })
 }
 

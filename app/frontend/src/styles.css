@@ -357,3 +357,18 @@ details summary { cursor: pointer; font-weight: 600; margin-top: 10px; }
 .cell { cursor: pointer; }
 .cell:hover { outline: 1px solid var(--muted); }
 .chart .tip { top: 96px; }
+
+/* Optional simulation inherits the supervisor console's light/dark tokens. */
+.live-simulation .simulation-banner {
+  display: flex; flex-wrap: wrap; gap: 4px 16px; margin-bottom: 18px;
+  padding: 12px 16px; border: 1px solid var(--pending); border-radius: 14px;
+  background: var(--pending-soft); color: var(--ink); box-shadow: var(--shadow);
+}
+.live-simulation .simulation-banner strong { color: var(--pending); }
+.live-simulation .simulation-controls {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px;
+}
+.live-simulation .simulation-controls input,
+.live-simulation .simulation-controls select { display: block; width: 100%; margin-top: 4px; }
+.live-simulation .simulation-state { font-family: var(--mono); font-weight: 600; font-variant-numeric: tabular-nums; }
+.live-simulation .simulation-context { border-left: 3px solid var(--pending); }

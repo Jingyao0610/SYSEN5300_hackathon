@@ -7,11 +7,13 @@ import { TZ, nyLocalToIso, nyMidnightIso, showNy } from './time.js'
 import DataSettings from './views/DataSettings.jsx'
 import ZoneMonitoring from './views/ZoneMonitoring.jsx'
 import IncidentReview from './views/IncidentReview.jsx'
+import LiveSimulation from './views/LiveSimulation.jsx'
 
 const PAGES = [
   ['data', 'Data & Settings'],
   ['zones', 'Zone Monitoring'],
   ['incidents', 'Incident Review'],
+  ['simulation', 'Live Simulation'],
 ]
 
 const DEFAULT_SETTINGS = { selected_priority: '', target_minutes: '10', baseline_end: '', as_of: '' }
@@ -134,7 +136,7 @@ export default function App() {
       setResult(null)
       setErrors([])
       await run([], undefined, { records: rows, settings: ex.settings })
-      if (openDashboard) setPage('zones')
+      if (openDashboard) setPage((current) => current === 'simulation' ? current : 'zones')
     } catch (e) {
       setErrors([`Could not load the example ${ex.file}: ${e.message}`])
     } finally {
@@ -202,7 +204,7 @@ export default function App() {
               <span className="dot" />
               {MOCK ? 'mock mode' : api.state === 'ok' ? `API · ${api.mode ?? 'unknown'} mode` : api.state === 'down' ? 'API unreachable' : 'API · checking'}
             </span>
-            {res && <span className="pill">as of {asOfShort(res.meta.as_of)}</span>}
+            {page !== 'simulation' && res && <span className="pill">as of {asOfShort(res.meta.as_of)}</span>}
             <button className="pill theme" onClick={cycleTheme} title="Switch light / dark theme">
               {theme === 'dark' ? '☾ dark' : theme === 'light' ? '☀ light' : '◐ auto'}
             </button>
@@ -231,9 +233,9 @@ export default function App() {
       )}
 
       <div className="page">
-        <ContextBar result={result} settings={settings} records={records} source={source} />
+        {page !== 'simulation' && <ContextBar result={result} settings={settings} records={records} source={source} />}
 
-        {errors.length > 0 && (
+        {page !== 'simulation' && errors.length > 0 && (
           <div className="error" role="alert" ref={errorRef}>
             {errors.map((e, i) => <div key={i}>{e}</div>)}
           </div>
@@ -257,6 +259,9 @@ export default function App() {
           {page === 'incidents' && (
             <IncidentReview res={res} focus={focus} onFocus={setFocus} onBack={() => setPage('zones')} />
           )}
+          <div hidden={page !== 'simulation'}>
+            <LiveSimulation active={page === 'simulation'} />
+          </div>
         </main>
       </div>
     </div>

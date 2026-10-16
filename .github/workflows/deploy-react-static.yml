@@ -51,6 +51,7 @@ env:
   APP_DIR: 'app/frontend'            # folder holding package.json
   CONTENT_NAME: ${{ github.repository_owner }}-${{ github.event.repository.name }}-web
   CONTENT_TITLE: ${{ github.event.repository.name }} website
+  CONTENT_GUID: 'fbeb8e54-b833-4b0f-8d87-8ca4617354a8' # existing user-confirmed deliverable; never create another item
   NODE_VERSION: '22'
   VITE_API_URL: ${{ vars.VITE_API_URL }}  # read by app/frontend/src/api.js; set after the API is live
 

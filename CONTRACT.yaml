@@ -208,3 +208,26 @@ tasks:
       testme script and the H-03 tests both pass with no extra steps; git
       grep -i "api_key" finds no real key; the Devpost entry links the repo.
     result: ""
+
+  - id: H-09
+    title: Optional live synthetic stream and accelerated monitoring
+    points: "Extension - no additional rubric points"
+    status: in_progress
+    owner: "Shifeng Hong + Codex"
+    started_at: "2026-10-16 19:44 -04:00"
+    owns: ["SPEC.md", "app/frontend/src/", "app/frontend/acceptance/simulation_core_check.mjs", "docs/live-simulation.md", ".github/workflows/deploy-react-static.yml"]
+    notes: >
+      Shifeng explicitly requested implementation and an update of the existing
+      deliverable website after reviewing the simulation proposal. This is a
+      separately authorized extension to the completed H-04 frontend, not a
+      replacement of Pingchuan's work or approval of the UI concept redesign.
+      Reuse the current backend and statistics unchanged; publish the frontend
+      through the existing deployment workflow to the established website.
+    definition_of_done: >
+      npm --prefix app/frontend test and npm --prefix app/frontend run build pass.
+      pytest tests and node app/frontend/acceptance/simulation_core_check.mjs pass,
+      including actual generated-record/core/API checks.
+      Browser verifies initialize, review, start/pause, closed-day signals,
+      scenario switch, reset, export, session isolation and API-error behavior.
+      The existing deployed website shows the new feature and real API results.
+    result: "Implemented; 37 frontend tests, 175 backend tests and 10 generated-stream parity cases pass. Local browser controls, failure recovery and export verified; existing-site deployment pending."
