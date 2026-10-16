@@ -1,6 +1,6 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { COLUMNS, extraColumns, parseIncidents, toCsv } from '../csv.js'
-import { reasonText, reasonsText } from '../status.js'
+import { pct, reasonText, reasonsText } from '../status.js'
 import { nyLocalToIso, showNy } from '../time.js'
 
 const PREVIEW_ROWS = 100
@@ -9,6 +9,8 @@ const EMPTY_FORM = { incident_id: '', zone: '', priority: '', dispatched_at: '',
 export default function DataSettings({ records, source, settings, res, busy, onRecords, onSettings, onRun, onShowChart }) {
   const [importError, setImportError] = useState('')
   const [form, setForm] = useState(null)
+  const [over, setOver] = useState(false)
+  const fileRef = useRef(null)
 
   const extras = useMemo(() => extraColumns(records), [records])
   const priorities = useMemo(() => [...new Set(records.map((r) => r.priority).filter(Boolean))].sort(), [records])
@@ -17,9 +19,7 @@ export default function DataSettings({ records, source, settings, res, busy, onR
     [res]
   )
 
-  async function importFile(e) {
-    const file = e.target.files?.[0]
-    e.target.value = ''
+  async function importFile(file) {
     if (!file) return
     try {
       const rows = parseIncidents(await file.text())
@@ -30,6 +30,18 @@ export default function DataSettings({ records, source, settings, res, busy, onR
     } catch (err) {
       setImportError(`${file.name}: ${err.message}`)
     }
+  }
+
+  function onPick(e) {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    importFile(file)
+  }
+
+  function onDrop(e) {
+    e.preventDefault()
+    setOver(false)
+    importFile(e.dataTransfer.files?.[0])
   }
 
   function exportCsv() {
@@ -53,25 +65,60 @@ export default function DataSettings({ records, source, settings, res, busy, onR
     setForm(null)
   }
 
+  // Display-only tallies of items the API returned (no statistics computed here).
+  const high = res ? res.signals.filter((s) => s.status === 'high').length : 0
+  const low = res ? res.signals.filter((s) => s.status === 'low').length : 0
+  const waiting = res ? res.daily_points.filter((p) => !['high', 'low', 'no_signal'].includes(p.status)).length : 0
+
   return (
     <>
-      <section className="panel">
-        <h2>1. Records</h2>
-        <p className="muted">
-          One row per completed dispatch with columns <code>{COLUMNS.join(', ')}</code>. Timestamps need a UTC
-          offset, e.g. <code>2026-09-21T08:15:00-04:00</code>. Importing replaces the current session; records are
-          kept only in this browser tab, so export them to keep a copy.
+      <section className="hero">
+        <div className="kicker">Daily p chart · dispatch supervisors</div>
+        <h1>Spot the zones where late arrivals are rising</h1>
+        <p className="tag">
+          Load a completed-response log, pick a priority and a baseline period, and the server compares each zone&rsquo;s
+          daily share of late arrivals with that zone&rsquo;s own baseline. Days that cross the control limits are
+          listed for review, down to the individual incidents.
         </p>
+        <div className="how">
+          <div><b><span className="ic">📄</span>1 · Load records</b><p>A CSV with five columns from the dispatch log.</p></div>
+          <div><b><span className="ic">⚙️</span>2 · Run the analysis</b><p>Choose priority, target and baseline end.</p></div>
+          <div><b><span className="ic">📈</span>3 · Review zones</b><p>Confirm each baseline, then read the signals and incidents.</p></div>
+        </div>
+      </section>
+
+      <section className="panel">
+        <div className="panel-head"><span className="pn">1</span><h2>Records</h2>
+          <span className="aside">kept in this browser tab only</span></div>
+
+        <div
+          className={over ? 'drop over' : 'drop'}
+          onClick={() => fileRef.current?.click()}
+          onDragOver={(e) => { e.preventDefault(); setOver(true) }}
+          onDragLeave={() => setOver(false)}
+          onDrop={onDrop}
+          role="button" tabIndex={0}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') fileRef.current?.click() }}
+        >
+          <div className="big-ic" aria-hidden="true">⬆️</div>
+          <b>Drop a CSV here, or click to choose a file</b>
+          <span className="muted">
+            Columns <code>{COLUMNS.join(', ')}</code>; times with a UTC offset, e.g. <code>2026-09-21T08:15:00-04:00</code>.
+            Importing replaces the current session.
+          </span>
+          <input ref={fileRef} type="file" accept=".csv,text/csv" onChange={onPick} hidden />
+        </div>
+
         <div className="row">
-          <label className="button">
-            Import CSV
-            <input type="file" accept=".csv,text/csv" onChange={importFile} hidden />
-          </label>
+          <button onClick={() => fileRef.current?.click()}>Import CSV</button>
           <button onClick={() => setForm({ ...EMPTY_FORM, priority: settings.selected_priority })} disabled={!!form}>
             Add completed response
           </button>
           <button onClick={exportCsv} disabled={records.length === 0}>Export CSV</button>
-          <span className="muted">
+        </div>
+        <div className={records.length ? 'loaded' : 'muted'}>
+          {records.length > 0 && <span aria-hidden="true">✅</span>}
+          <span>
             {records.length ? `${records.length} rows from ${source}` : 'No records loaded.'}
             {extras.length > 0 && ` · extra column(s) kept for export, not analysed: ${extras.join(', ')}`}
           </span>
@@ -104,7 +151,8 @@ export default function DataSettings({ records, source, settings, res, busy, onR
       </section>
 
       <section className="panel">
-        <h2>2. Settings</h2>
+        <div className="panel-head"><span className="pn">2</span><h2>Settings</h2>
+          <span className="aside">all times New York</span></div>
         <div className="settings">
           <label>
             Priority to analyse
@@ -112,36 +160,52 @@ export default function DataSettings({ records, source, settings, res, busy, onR
               <option value="">— choose —</option>
               {priorities.map((p) => <option key={p} value={p}>{p}</option>)}
             </select>
+            <small>One category at a time; each zone gets its own baseline.</small>
           </label>
           <label>
             Target (minutes)
             <input type="number" min="0" step="any" value={settings.target_minutes}
               onChange={(e) => onSettings({ target_minutes: e.target.value })} />
-            <small className="muted">Late = response time strictly above this. 10 is a demo value, not a clinical standard.</small>
+            <small>Late = response time strictly above this. 10 is a demo value, not a clinical standard.</small>
           </label>
           <label>
             Baseline ends at the start of
             <input type="date" value={settings.baseline_end} onChange={(e) => onSettings({ baseline_end: e.target.value })} />
-            <small className="muted">New York midnight; dispatches from this moment on are monitoring days.</small>
+            <small>New York midnight; dispatches from this moment on are monitoring days.</small>
           </label>
           <label>
             Analysis time (optional)
             <input type="datetime-local" step="1" value={settings.as_of} onChange={(e) => onSettings({ as_of: e.target.value })} />
-            <small className="muted">Leave blank for the server&rsquo;s current time. A historical time is for demos and tests.</small>
+            <small>Leave blank for the server&rsquo;s current time. A historical time is for demos and tests.</small>
           </label>
         </div>
         <div className="row">
-          <button className="primary" onClick={onRun} disabled={busy}>{busy ? 'Running…' : 'Run analysis'}</button>
-          {res && <button onClick={onShowChart}>View zone chart →</button>}
+          <button className="primary big" onClick={onRun} disabled={busy}>{busy ? 'Running…' : 'Run analysis'}</button>
           {!res && records.length > 0 && <span className="muted">No current result: run the analysis after any change.</span>}
         </div>
+
+        {res && res.quality.reasons.length === 0 && (
+          <div className="callout ok">
+            <b>Analysis ready.</b> Next, open the zone chart and confirm each baseline before reading verdicts.
+            <div className="kpis">
+              <div className="kpi"><div className="k">Zones</div><div className="v">{res.zone_baselines.length}</div></div>
+              <div className="kpi"><div className="k">Monitoring days</div><div className="v">{res.daily_points.length}</div><div className="s">zone × day</div></div>
+              <div className="kpi"><div className="k">High signals</div><div className={high ? 'v critical' : 'v'}>{high}</div></div>
+              <div className="kpi"><div className="k">Low signals</div><div className="v">{low}</div></div>
+              <div className="kpi"><div className="k">No verdict yet</div><div className="v">{waiting}</div><div className="s">unreviewed, insufficient or today</div></div>
+              <div className="kpi"><div className="k">Usable rows</div><div className="v">{pct(res.quality.selected_priority.usable_fraction)}</div><div className="s">of this priority</div></div>
+            </div>
+            <div className="row"><button className="primary" onClick={onShowChart}>View zone chart →</button></div>
+          </div>
+        )}
         {res?.quality.reasons.length > 0 && (
           <p className="notice">{res.quality.reasons.map(reasonText).join(' ')} There is no result to chart; no rate is shown as zero.</p>
         )}
       </section>
 
       <section className="panel">
-        <h2>3. Record preview</h2>
+        <div className="panel-head"><span className="pn">3</span><h2>Record preview</h2>
+          {records.length > 0 && <span className="aside">first {Math.min(PREVIEW_ROWS, records.length)} of {records.length}</span>}</div>
         {res && (
           <p className="muted">
             Rows the server excluded show the reason. Excluded rows are left out of every count, rate and limit.
@@ -150,7 +214,7 @@ export default function DataSettings({ records, source, settings, res, busy, onR
         {records.length === 0 ? (
           <p className="muted">Nothing to show yet.</p>
         ) : (
-          <div className="scroll">
+          <div className="scroll tall">
             <table>
               <thead>
                 <tr><th>#</th>{COLUMNS.map((c) => <th key={c}>{c}</th>)}<th>Excluded because</th></tr>
@@ -172,7 +236,6 @@ export default function DataSettings({ records, source, settings, res, busy, onR
                 })}
               </tbody>
             </table>
-            {records.length > PREVIEW_ROWS && <p className="muted">Showing the first {PREVIEW_ROWS} of {records.length} rows.</p>}
           </div>
         )}
         {res && res.excluded_records.length > 0 && (

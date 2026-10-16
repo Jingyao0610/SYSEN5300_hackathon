@@ -17,6 +17,8 @@ mkdirSync(OUT, { recursive: true })
 
 const plan = JSON.parse(readFileSync(`${R}/plan.json`, 'utf8'))
 const b = await puppeteer.launch({ executablePath: CHROME, headless: true, protocolTimeout: 300000 })
+// The export check reads the CSV in memory; never let Chrome save files into ~/Downloads.
+await (await b.target().createCDPSession()).send('Browser.setDownloadBehavior', { behavior: 'deny' })
 const wait = (ms = 500) => new Promise((r) => setTimeout(r, ms))
 const pct = (p) => (p == null ? '—' : `${(p * 100).toFixed(1)}%`)
 const LABEL = { high: 'High late rate', low: 'Low late rate', no_signal: 'No signal', insufficient_data: 'Insufficient data',
@@ -83,7 +85,7 @@ for (const run of plan) {
   await click(p, 'View zone chart')
   await wait(800)
   for (const z of run.confirm) {
-    await p.select('.panel select', z)
+    await p.select('select[name=zone]', z)
     await wait(300)
     const n = p.got.length
     await p.click('label.check input')
@@ -97,8 +99,8 @@ for (const run of plan) {
     t.includes(`${q.overall.usable_rows} usable / ${q.overall.excluded_rows} excluded of ${q.overall.total_rows}`)
     && t.includes(`${q.selected_priority.usable_rows} usable / ${q.selected_priority.excluded_rows} excluded of ${q.selected_priority.total_rows}`))
   const listed = await p.evaluate(() => {
-    const h = [...document.querySelectorAll('h2')].find((x) => x.innerText.startsWith('Days to review'))
-    return h?.parentElement.querySelector('tbody')?.rows.length ?? 0
+    // one feed item per formal signal, under the "Days to review" heading
+    return document.querySelectorAll('[data-signal]').length
   })
   check(name, `formal signals listed: ${final.signals.length}`, listed === final.signals.length, `page ${listed}`)
 
@@ -106,7 +108,7 @@ for (const run of plan) {
   const rowBad = []
   const chartBad = []
   for (const bz of final.zone_baselines) {
-    await p.select('.panel select', bz.zone)
+    await p.select('select[name=zone]', bz.zone)
     await wait(400)
     const shown = await p.evaluate(() => [...document.querySelectorAll('tr')]
       .filter((r) => r.cells[1]?.innerText === 'monitoring').map((r) => [...r.cells].slice(0, 8).map((c) => c.innerText.trim())))
@@ -121,7 +123,8 @@ for (const run of plan) {
       const svg = document.querySelector('.chart > svg')
       return svg && { markers: svg.querySelectorAll('.mk').length, limits: svg.querySelectorAll('g.limit').length, center: svg.querySelectorAll('g.center').length }
     })
-    const want = { markers: bz.daily.length + mon.filter((d) => d.rate != null).length, limits: mon.filter((d) => d.upper != null).length, center: bz.p_bar == null ? 0 : 1 }
+    // the chart shows monitoring days by default (baseline days behind a toggle)
+    const want = { markers: mon.filter((d) => d.rate != null).length, limits: mon.filter((d) => d.upper != null).length, center: bz.p_bar == null ? 0 : 1 }
     if (!isDeepStrictEqual(c, want)) chartBad.push(`${bz.zone}: page ${JSON.stringify(c)} want ${JSON.stringify(want)}`)
     if (shot && ['A', 'EDGE', 'BROOKLYN'].includes(bz.zone)) await p.screenshot({ path: `${OUT}/${name}-2-zone-${bz.zone}.png`, fullPage: true })
   }

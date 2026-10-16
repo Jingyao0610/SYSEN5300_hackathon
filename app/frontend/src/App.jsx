@@ -27,6 +27,18 @@ export default function App() {
   const [api, setApi] = useState({ state: 'checking' })
   const [mock, setMock] = useState(null) // { scenarios, csv, picked }
   const errorRef = useRef(null)
+  const [theme, setTheme] = useState(() => {
+    try { return localStorage.getItem('theme') || 'auto' } catch { return 'auto' }
+  })
+
+  useEffect(() => {
+    const root = document.documentElement
+    if (theme === 'auto') root.removeAttribute('data-theme')
+    else root.setAttribute('data-theme', theme)
+    try { localStorage.setItem('theme', theme) } catch { /* private mode: theme just isn't remembered */ }
+  }, [theme])
+
+  const cycleTheme = () => setTheme((t) => (t === 'auto' ? 'light' : t === 'light' ? 'dark' : 'auto'))
 
   useEffect(() => {
     if (errors.length) errorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
@@ -121,6 +133,38 @@ export default function App() {
 
   return (
     <div className="app">
+      <nav className="nav" aria-label="Pages">
+        <div className="nav-inner">
+          <div className="brand">
+            <span className="logo" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M2 12h4l3-7 4 14 3-7h6" />
+              </svg>
+            </span>
+            <div><b>Response Late-Rate Monitor</b><span>EMS dispatch supervisor console</span></div>
+          </div>
+          <div className="tabs">
+            {PAGES.map(([key, label]) => (
+              <button key={key} className={page === key ? 'tab on' : 'tab'} onClick={() => setPage(key)}
+                aria-current={page === key ? 'page' : undefined}>
+                {label}
+                {key === 'data' && res && <span className="done" aria-label="analysis ready">✓</span>}
+              </button>
+            ))}
+          </div>
+          <div className="pills">
+            <span className={`pill ${MOCK ? 'down' : api.state}`} title={MOCK ? 'Mock mode' : `API at ${API_URL}`}>
+              <span className="dot" />
+              {MOCK ? 'mock mode' : api.state === 'ok' ? `API · ${api.mode ?? 'unknown'} mode` : api.state === 'down' ? 'API unreachable' : 'API · checking'}
+            </span>
+            {res && <span className="pill">as of {asOfShort(res.meta.as_of)}</span>}
+            <button className="pill theme" onClick={cycleTheme} title="Switch light / dark theme">
+              {theme === 'dark' ? '☾ dark' : theme === 'light' ? '☀ light' : '◐ auto'}
+            </button>
+          </div>
+        </div>
+      </nav>
+
       {showMock && (
         <div className="mock-banner" role="alert">
           <strong>MOCK DATA — not a live analysis.</strong>
@@ -141,64 +185,62 @@ export default function App() {
         </div>
       )}
 
-      <header>
-        <h1>Response Late-Rate Monitor</h1>
-        <p className="lede">
-          For ambulance dispatch supervisors: which zones show an unusual change in the daily share of late
-          arrivals, and which completed responses need review. All statistics come from the server.
-        </p>
-        <nav aria-label="Pages">
-          {PAGES.map(([key, label]) => (
-            <button key={key} className={page === key ? 'tab on' : 'tab'} onClick={() => setPage(key)}
-              aria-current={page === key ? 'page' : undefined}>
-              {label}
-            </button>
-          ))}
-        </nav>
-        <ContextBar result={result} settings={settings} records={records} api={api} />
-      </header>
+      <div className="page">
+        <ContextBar result={result} settings={settings} records={records} source={source} />
 
-      {errors.length > 0 && (
-        <div className="error" role="alert" ref={errorRef}>
-          {errors.map((e, i) => <div key={i}>{e}</div>)}
-        </div>
-      )}
+        {errors.length > 0 && (
+          <div className="error" role="alert" ref={errorRef}>
+            {errors.map((e, i) => <div key={i}>{e}</div>)}
+          </div>
+        )}
 
-      <main>
-        {page === 'data' && (
-          <DataSettings
-            records={records} source={source} settings={settings} res={res} busy={busy}
-            onRecords={changeRecords} onSettings={changeSettings} onRun={() => run([])}
-            onShowChart={() => setPage('zones')}
-          />
-        )}
-        {page === 'zones' && (
-          <ZoneMonitoring
-            res={res} busy={busy} onToggleReviewed={toggleReviewed}
-            onViewIncidents={viewIncidents} onBack={() => setPage('data')}
-          />
-        )}
-        {page === 'incidents' && (
-          <IncidentReview res={res} focus={focus} onFocus={setFocus} onBack={() => setPage('zones')} />
-        )}
-      </main>
+        <main>
+          {page === 'data' && (
+            <DataSettings
+              records={records} source={source} settings={settings} res={res} busy={busy}
+              onRecords={changeRecords} onSettings={changeSettings} onRun={() => run([])}
+              onShowChart={() => setPage('zones')}
+            />
+          )}
+          {page === 'zones' && (
+            <ZoneMonitoring
+              res={res} busy={busy} source={source} onToggleReviewed={toggleReviewed}
+              onViewIncidents={viewIncidents} onBack={() => setPage('data')}
+            />
+          )}
+          {page === 'incidents' && (
+            <IncidentReview res={res} focus={focus} onFocus={setFocus} onBack={() => setPage('zones')} />
+          )}
+        </main>
+      </div>
     </div>
   )
 }
 
-function ContextBar({ result, settings, records, api }) {
+/** "2026-10-02 00:00" in New York time, for the navbar pill. */
+function asOfShort(iso) {
+  const parts = Object.fromEntries(new Intl.DateTimeFormat('en-CA', {
+    timeZone: TZ, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false,
+  }).formatToParts(new Date(iso)).map((p) => [p.type, p.value]))
+  return `${parts.year}-${parts.month}-${parts.day} ${parts.hour === '24' ? '00' : parts.hour}:${parts.minute}`
+}
+
+function ContextBar({ result, settings, records, source }) {
   const m = result?.res.meta
   const q = result?.res.quality
   const scope = (c) => `${c.usable_rows} usable / ${c.excluded_rows} excluded of ${c.total_rows}`
+  const cutoff = m?.baseline_end?.slice(0, 10) ?? settings.baseline_end
   return (
     <dl className="context">
+      <div><dt>Dataset</dt><dd>{records.length ? source : 'none loaded'}</dd></div>
+      <div><dt>Priority</dt><dd>{m?.selected_priority ?? (settings.selected_priority || '—')}</dd></div>
+      <div><dt>Late if</dt><dd>{`> ${m?.target_minutes ?? settings.target_minutes} min`}</dd></div>
+      <div><dt>Baseline</dt><dd>{cutoff ? `before ${cutoff}` : '—'}</dd></div>
       <div><dt>Time zone</dt><dd>{TZ}</dd></div>
       <div>
         <dt>Analysis as of</dt>
         <dd>{m ? `${showNy(m.as_of)}${result.serverClock ? ' (server clock)' : ''}` : 'not run'}</dd>
       </div>
-      <div><dt>Target</dt><dd>{`${m?.target_minutes ?? settings.target_minutes} min`}</dd></div>
-      <div><dt>Priority</dt><dd>{m?.selected_priority ?? (settings.selected_priority || '—')}</dd></div>
       <div>
         <dt>Selected priority rows</dt>
         <dd>{q ? `${scope(q.selected_priority)} (${pct(q.selected_priority.usable_fraction)} usable)` : `${records.length} rows loaded, not analysed`}</dd>
@@ -206,14 +248,6 @@ function ContextBar({ result, settings, records, api }) {
       <div>
         <dt>All imported rows</dt>
         <dd>{q ? `${scope(q.overall)} (${pct(q.overall.usable_fraction)} usable)` : '—'}</dd>
-      </div>
-      <div>
-        <dt>API</dt>
-        <dd className={`api ${api.state}`}>
-          {MOCK ? 'MOCK (not called)'
-            : api.state === 'ok' ? `connected (${api.mode ?? 'unknown'} mode)`
-            : api.state === 'down' ? `unreachable at ${API_URL}` : 'checking…'}
-        </dd>
       </div>
     </dl>
   )

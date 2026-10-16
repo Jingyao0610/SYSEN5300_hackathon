@@ -12,6 +12,8 @@ mkdirSync(OUT, { recursive: true })
 const J = (f) => JSON.parse(readFileSync(`${H}/${f}`, 'utf8'))
 const manifest = J('manifest.json')
 const b = await puppeteer.launch({ executablePath: CHROME, headless: true })
+// The export check reads the CSV in memory; never let Chrome save files into ~/Downloads.
+await (await b.target().createCDPSession()).send('Browser.setDownloadBehavior', { behavior: 'deny' })
 const wait = (ms = 500) => new Promise(r => setTimeout(r, ms))
 const pct = (p) => p == null ? '—' : `${(p * 100).toFixed(1)}%`
 const LABEL = { high: 'High late rate', low: 'Low late rate', no_signal: 'No signal', insufficient_data: 'Insufficient data',
