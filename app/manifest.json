@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "locale": "zh_CN.UTF-8",
+  "metadata": {
+    "appmode": "python-fastapi",
+    "entrypoint": "app:app"
+  },
+  "python": {
+    "version": "3.12.15",
+    "package_manager": {
+      "name": "pip",
+      "version": "26.2.1",
+      "package_file": "requirements.txt"
+    }
+  },
+  "files": {
+    "requirements.txt": {
+      "checksum": "2f684fec52d1edd2d19e3cacb9bea34d"
+    },
+    "README.md": {
+      "checksum": "1c592af2911d5d16ffb61b0e76bff37b"
+    },
+    "app.py": {
+      "checksum": "bf30c7504b6b30e862424dc8bba25809"
+    },
+    "deployme.sh": {
+      "checksum": "9583cd76f1f4a43d93a45f60e4cba8d6"
+    },
+    "manifestme.sh": {
+      "checksum": "8bc518f52527e0140849c3bd017088c7"
+    },
+    "qc.py": {
+      "checksum": "930595c05695c55772be42cfb42997a8"
+    },
+    "testme.sh": {
+      "checksum": "0b5ca9bc144d0eaea4ac8878944c6bbf"
+    }
+  }
+}
