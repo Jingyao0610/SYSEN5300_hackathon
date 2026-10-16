@@ -5,7 +5,8 @@ This document makes the [SPEC](../SPEC.md), [implementation plan](plan.md), and
 [five-person plan](team.en.md) concrete. The H-03 core implements this response schema and has
 passed 112 tests plus an [independent statistical review](../tests/fixtures/qc/REVIEW.md).
 Julian owns the backend integration; Pingchuan owns the frontend adaptation. The frontend's earlier
-MOCK payload is a prototype, not an alternative API schema. HTTP and UI acceptance remain H-04 work.
+MOCK payload is a prototype, not an alternative API schema. Julian's backend fork has passed
+independent HTTP verification (section 9); integration with the current frontend remains H-04 work.
 The separate H-01 team method walkthrough is not claimed complete by this interface release.
 
 The method is a daily p chart of late completed responses, separately for each zone within one
@@ -578,7 +579,8 @@ so the baseline cutoff is valid. Record timestamps must already be at or before 
 ## 8. Required implementation checks and handoff
 
 The H-03 core checks have passed; see the [numerical review](../tests/fixtures/qc/REVIEW.md).
-The API and browser checks below remain H-04 acceptance work. H-03 owns core fixtures/tests;
+The API and browser checks below define H-04 acceptance; section 9 records the isolated backend
+checks now completed, while real browser acceptance remains pending. H-03 owns core fixtures/tests;
 H-04 owns API fixtures/tests and browser checks. Keep their file ownership separate.
 
 | Case | Required check |
@@ -609,7 +611,8 @@ The team method walkthrough remains a separate H-01 acceptance step.
 ## 9. Backend handoff to Julian
 
 H-04 is assigned to Julian Jiang, with Pingchuan exclusively responsible for `app/frontend/`.
-Backend environment readiness is teammate-reported; end-to-end acceptance is still pending.
+Backend verification is now complete for the fork commit identified below; integration with the
+team's current frontend and end-to-end acceptance are still pending.
 
 1. Pull the shared branch before starting. Preserve the existing `app/qc.py` and `app/frontend/`
    when copying the FastAPI starter; initialize only the missing backend files and four scripts.
@@ -631,6 +634,46 @@ Backend environment readiness is teammate-reported; end-to-end acceptance is sti
 
 The H-03 implementation and review are ready for real integration. Do not substitute mock results
 when real analysis fails. H-04 remains in progress until all of its ledger acceptance checks pass.
+
+### Independent backend verification on 2026-10-16
+
+Julian's implementation is on `Yulinjiang599/SYSEN5300_hackathon`, branch `codex/h04-backend`,
+at [commit 1a89adf6ddf679ccdaa759497b6bda8aa51281dc](https://github.com/Yulinjiang599/SYSEN5300_hackathon/commit/1a89adf6ddf679ccdaa759497b6bda8aa51281dc).
+It adds eight backend/script/test files. Shifeng reviewed and tested an isolated copy of that exact
+commit, with the declared backend dependencies installed separately. Its core, core tests and
+fixture generator are identical to the team's verified versions.
+
+The response follows v1.0 without a translation layer: the API returns `analyze_response` output
+unchanged. Strict request validation, defaults, the server clock check, row-level exclusions and
+the `error.code/message/fields` envelope match this document. There is no mock fallback.
+
+Actual independent verification output:
+
+```text
+pytest tests -o faulthandler_timeout=20
+175 passed, 1 warning in 2.42s
+
+PASS: real HTTP /health reports schema 1.0 and real analysis.
+PASS: nine real HTTP responses match the core; no browser test performed.
+PASS HTTP 422: invalid target uses the agreed error envelope.
+```
+
+The warning is a Starlette/AnyIO deprecated `BlockingPortal` alias, not a failed assertion. The
+nine HTTP checks used a real temporary Uvicorn server and the exact section 11 request bodies;
+every complete success response equaled its verified expected JSON, including K1/K3 boundaries,
+insufficient/unreviewed/current-day states and empty input. The server was stopped after the checks.
+
+Julian separately reported that both services start via the script. That combined-startup claim
+was not repeated in this independent backend review, and real page rendering has not been accepted.
+His fork has an older frontend snapshot: bring the eight-file backend change onto the current team
+branch, preserving the frontend adaptation already landed in `4e0548b`. Do not replace the team
+checkout with the fork's whole tree. No backend merge, PR creation or deployment was performed by
+this review; H-04 remains `in_progress` until its remaining acceptance checks pass.
+
+For Windows Git Bash, a locally created virtual environment is activated with
+`source .venv/Scripts/activate`; if `python3` is unavailable, use
+`PYTHON_BIN=python bash app/testme.sh` after installing backend and frontend dependencies. These
+are platform-specific setup notes for integration, not additional startup verification.
 
 ## 10. Frontend migration from the initial MOCK prototype
 
@@ -690,8 +733,9 @@ remain for H-04 acceptance:
   separately, or provide an explicit UI test path. The current MOCK scenario named `empty`
   contains two invalid P1 records; it tests `no_usable_imported_records`, a different case.
 
-No backend entry point or startup script was present in this repository snapshot, so real
-HTTP/browser integration remains pending. The API fixture procedure below is ready for that handoff.
+The shared main branch still has no backend entry point or startup script. The fork implementation
+has now passed the independent HTTP checks in section 9; bringing it together with this frontend
+and verifying real browser behavior remain pending.
 
 ## 11. Executable handoff cases and integration acceptance
 
@@ -824,7 +868,7 @@ must be exercised through the UI, H-04 needs an explicit test entry point; do no
 |---|---|---|
 | Nine exported core cases and CSV round trips | PASS; verified locally | 15,252 data rows; 28 exported files |
 | Core definition of done | PASS; independently reviewed | `112 passed in 0.74s` |
-| Nine actual HTTP responses | Pending | Tested commit, operator, date, command output |
+| Nine actual HTTP responses | PASS on isolated backend fork `1a89adf`; not yet integrated into main | Shifeng + Codex, 2026-10-16; all complete responses match; see section 9 |
 | Browser cases with mock disabled | Pending | Frontend/backend commits, operator, visible values and evidence |
 | H-02 demonstration dataset parity | Pending dataset/integration | Dataset, exact settings, matching numbers |
 | H-01 human method walkthrough | Pending | Participants, date, unresolved explanations |

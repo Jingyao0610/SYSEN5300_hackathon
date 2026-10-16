@@ -44,7 +44,7 @@ tasks:
       grep -c "FILL IN[.,]" SPEC.md prints 0 (it counts only the blanks,
       not the instructions at the top), and every teammate can say the
       method sentence in SPEC section 4 without reading it.
-    result: "SPEC blanks 0; interfaces v1.0 includes nine-case integration procedure, English explanation, judge Q&A and team walkthrough. JSON, shell syntax, offline comparator and ledger checks pass. Human method acceptance and H-04 HTTP/UI checks remain pending."
+    result: "SPEC blanks 0; interfaces v1.0 includes integration steps and English method walkthrough. Documentation checks pass; Julian's backend fork now independently verified against v1.0. Human method acceptance and real frontend integration remain pending."
 
   - id: H-02
     title: Two or three test datasets plus a codebook
@@ -95,16 +95,20 @@ tasks:
       preparation may run alongside H-03; no silent mock fallback is allowed.
       Integrate real analysis only after H-03 verification. H-04 is complete only
       when backend, frontend and the end-to-end checks pass; there are no H-04a/b IDs.
-      Backend environment readiness was reported by Julian through Shifeng on
-      2026-10-16. The finalized v1.0 interface and verified H-03 core are ready;
-      the existing frontend MOCK schema must be adapted before real integration.
+      Julian reported backend completion on fork branch codex/h04-backend,
+      commit 1a89adf6ddf679ccdaa759497b6bda8aa51281dc, on 2026-10-16. Shifeng
+      independently verified that exact commit in an isolated copy; it is not
+      merged into the team main branch. Frontend v1.0 adaptation already landed
+      in 4e0548b; preserve that newer frontend when integrating the backend.
+      The verification evidence and remaining acceptance work are in
+      docs/interfaces.md sections 9-11. No deployment is claimed.
     definition_of_done: >
       pytest tests passes. From the repo root, bash app/testme.sh starts the
       complete tool with one command. K1 and K3 deterministic inputs return the
       same numbers through the core, API and UI; one data/ CSV agrees with the
       verified core. Invalid, insufficient, unreviewed and provisional cases
       remain explicit. Formal analysis has mock mode disabled.
-    result: "Frontend 4e0548b source review confirms the eleven v1.0 adaptations; isolated verification printed 15 passed (15) and production build succeeded in 5.19s. Extra-column CSV retention and empty-input UI handling remain documented; real API/browser parity and full H-04 acceptance are pending."
+    result: "Backend 1a89adf independently verified: 175 passed, 1 warning in 2.42s; nine real HTTP responses exactly match the core and 422 envelope passes. Frontend 4e0548b already passes 15 tests/build. Backend remains in fork; integration, live UI K1/K3, CSV retention and remaining H-04 acceptance are pending."
 
   - id: H-05
     title: Demonstration of the tool on every test dataset
