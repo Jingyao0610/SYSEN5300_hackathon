@@ -31,7 +31,7 @@ tasks:
     status: in_progress
     owner: "Codex + Chinese Can Fly"
     started_at: "2026-10-16 15:22 -04:00"
-    owns: ["SPEC.md", "docs/plan.md", "docs/team.md", "docs/interfaces.md"]
+    owns: ["SPEC.md", "docs/plan.md", "docs/team.md", "docs/team.en.md", "docs/interfaces.md"]
     notes: >
       Do this together, out loud, right after kickoff. The prompts are in
       docs/prompts.md once the event starts. Keep inputs to what the user can
