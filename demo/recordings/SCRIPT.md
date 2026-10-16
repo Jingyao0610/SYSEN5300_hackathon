@@ -36,7 +36,7 @@ Steps:
 4. Tick **Baseline reviewed** for zone A, then for zone B.
 
 > Twelve thousand synthetic responses, all usable. Before I review the baseline, the tool refuses to give verdicts —
-> every day says "Baseline not reviewed". Zone A's baseline: 291 late out of 2,000, so p-bar is 14.5%.
+> every day says "Baseline not reviewed". Zone A's baseline: 291 late out of 2,000, so p-bar is 14.55%.
 > With 100 responses a day, the limits are 4.0% to 25.1%. After I confirm both baselines, nothing crosses its limits —
 > zero signals. Zone A's worst day was 23%, still inside. That is "no signal", not proof the process is perfect.
 
@@ -52,9 +52,10 @@ Steps:
 > Two days, September 21 and 24, at 23% and 24%, stay inside the limits, so they are not signals.
 > Zone B is unchanged and shows nothing.
 
-Then click **View incidents** on one signal day:
+Then click **View incidents** on the A / September 22 row. It shows 41 late responses:
 
-> And here are the individual late responses behind that day, sorted by response time, for follow-up.
+> And here are the 41 late responses behind September 22, sorted by response time, for follow-up.
+> A single late incident is not automatically a statistical outlier.
 
 ## 1:35–2:10 — Data problems (`edge_cases.csv`, analysis time Oct 1 12:00)
 
