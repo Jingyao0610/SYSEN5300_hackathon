@@ -1,0 +1,1029 @@
+{
+  "source_revision": "e189c4b630f219435fcc89b8d216c41cabfde26a",
+  "checked_at_utc": "2026-10-16T22:42:11.947532+00:00",
+  "method": "Exact complete JSON equality against app.qc; live HTTP, real mode",
+  "live_http_calls": 37,
+  "datasets_unchanged": true,
+  "combinations": [
+    {
+      "file": "data/jingyao_synthetic/stable.csv",
+      "sha256": "7dff735aabb8bf8dfddca5c98f734a1b4dfed973a9f0e3172d900f8ff3e37670",
+      "settings": {
+        "target_minutes": 10,
+        "baseline_end": "2026-09-21T00:00:00-04:00",
+        "as_of": "2026-10-01T00:00:00-04:00",
+        "reviewed_zones": [
+          "A",
+          "B"
+        ],
+        "selected_priority": "P1"
+      },
+      "rows": 12000,
+      "result": "PASS exact full response parity; unreviewed/reviewed/replay",
+      "quality": {
+        "overall": {
+          "total_rows": 12000,
+          "usable_rows": 12000,
+          "excluded_rows": 0,
+          "usable_fraction": 1.0
+        },
+        "selected_priority": {
+          "total_rows": 6000,
+          "usable_rows": 6000,
+          "excluded_rows": 0,
+          "usable_fraction": 1.0
+        },
+        "unassigned_priority_rows": 0,
+        "reasons": []
+      },
+      "baselines": [
+        {
+          "zone": "A",
+          "n": 2000,
+          "late": 291,
+          "p_bar": 0.1455,
+          "status": "ready"
+        },
+        {
+          "zone": "B",
+          "n": 2000,
+          "late": 305,
+          "p_bar": 0.1525,
+          "status": "ready"
+        }
+      ],
+      "point_statuses": {
+        "no_signal": 20
+      },
+      "unreviewed_statuses": {
+        "unreviewed_baseline": 20
+      },
+      "signals": [],
+      "resolved_as_of": "2026-10-01T04:00:00+00:00"
+    },
+    {
+      "file": "data/jingyao_synthetic/stable.csv",
+      "sha256": "7dff735aabb8bf8dfddca5c98f734a1b4dfed973a9f0e3172d900f8ff3e37670",
+      "settings": {
+        "target_minutes": 10,
+        "baseline_end": "2026-09-21T00:00:00-04:00",
+        "as_of": "2026-10-01T00:00:00-04:00",
+        "reviewed_zones": [
+          "A",
+          "B"
+        ],
+        "selected_priority": "P2"
+      },
+      "rows": 12000,
+      "result": "PASS exact full response parity; unreviewed/reviewed/replay",
+      "quality": {
+        "overall": {
+          "total_rows": 12000,
+          "usable_rows": 12000,
+          "excluded_rows": 0,
+          "usable_fraction": 1.0
+        },
+        "selected_priority": {
+          "total_rows": 6000,
+          "usable_rows": 6000,
+          "excluded_rows": 0,
+          "usable_fraction": 1.0
+        },
+        "unassigned_priority_rows": 0,
+        "reasons": []
+      },
+      "baselines": [
+        {
+          "zone": "A",
+          "n": 2000,
+          "late": 305,
+          "p_bar": 0.1525,
+          "status": "ready"
+        },
+        {
+          "zone": "B",
+          "n": 2000,
+          "late": 304,
+          "p_bar": 0.152,
+          "status": "ready"
+        }
+      ],
+      "point_statuses": {
+        "no_signal": 20
+      },
+      "unreviewed_statuses": {
+        "unreviewed_baseline": 20
+      },
+      "signals": [],
+      "resolved_as_of": "2026-10-01T04:00:00+00:00"
+    },
+    {
+      "file": "data/jingyao_synthetic/zone_shift.csv",
+      "sha256": "16c5da1a0007b86b98d3474e45715f8547a9228fd7cce369e42fb8ad374ae665",
+      "settings": {
+        "target_minutes": 10,
+        "baseline_end": "2026-09-21T00:00:00-04:00",
+        "as_of": "2026-10-01T00:00:00-04:00",
+        "reviewed_zones": [
+          "A",
+          "B"
+        ],
+        "selected_priority": "P1"
+      },
+      "rows": 12000,
+      "result": "PASS exact full response parity; unreviewed/reviewed/replay",
+      "quality": {
+        "overall": {
+          "total_rows": 12000,
+          "usable_rows": 12000,
+          "excluded_rows": 0,
+          "usable_fraction": 1.0
+        },
+        "selected_priority": {
+          "total_rows": 6000,
+          "usable_rows": 6000,
+          "excluded_rows": 0,
+          "usable_fraction": 1.0
+        },
+        "unassigned_priority_rows": 0,
+        "reasons": []
+      },
+      "baselines": [
+        {
+          "zone": "A",
+          "n": 2000,
+          "late": 291,
+          "p_bar": 0.1455,
+          "status": "ready"
+        },
+        {
+          "zone": "B",
+          "n": 2000,
+          "late": 305,
+          "p_bar": 0.1525,
+          "status": "ready"
+        }
+      ],
+      "point_statuses": {
+        "no_signal": 12,
+        "high": 8
+      },
+      "unreviewed_statuses": {
+        "unreviewed_baseline": 20
+      },
+      "signals": [
+        {
+          "zone": "A",
+          "date": "2026-09-22",
+          "n": 100,
+          "late": 41,
+          "rate": 0.41,
+          "lower": 0.03971872802806728,
+          "upper": 0.25128127197193273,
+          "status": "high"
+        },
+        {
+          "zone": "A",
+          "date": "2026-09-23",
+          "n": 100,
+          "late": 30,
+          "rate": 0.3,
+          "lower": 0.03971872802806728,
+          "upper": 0.25128127197193273,
+          "status": "high"
+        },
+        {
+          "zone": "A",
+          "date": "2026-09-25",
+          "n": 100,
+          "late": 31,
+          "rate": 0.31,
+          "lower": 0.03971872802806728,
+          "upper": 0.25128127197193273,
+          "status": "high"
+        },
+        {
+          "zone": "A",
+          "date": "2026-09-26",
+          "n": 100,
+          "late": 37,
+          "rate": 0.37,
+          "lower": 0.03971872802806728,
+          "upper": 0.25128127197193273,
+          "status": "high"
+        },
+        {
+          "zone": "A",
+          "date": "2026-09-27",
+          "n": 100,
+          "late": 43,
+          "rate": 0.43,
+          "lower": 0.03971872802806728,
+          "upper": 0.25128127197193273,
+          "status": "high"
+        },
+        {
+          "zone": "A",
+          "date": "2026-09-28",
+          "n": 100,
+          "late": 33,
+          "rate": 0.33,
+          "lower": 0.03971872802806728,
+          "upper": 0.25128127197193273,
+          "status": "high"
+        },
+        {
+          "zone": "A",
+          "date": "2026-09-29",
+          "n": 100,
+          "late": 39,
+          "rate": 0.39,
+          "lower": 0.03971872802806728,
+          "upper": 0.25128127197193273,
+          "status": "high"
+        },
+        {
+          "zone": "A",
+          "date": "2026-09-30",
+          "n": 100,
+          "late": 42,
+          "rate": 0.42,
+          "lower": 0.03971872802806728,
+          "upper": 0.25128127197193273,
+          "status": "high"
+        }
+      ],
+      "resolved_as_of": "2026-10-01T04:00:00+00:00"
+    },
+    {
+      "file": "data/jingyao_synthetic/zone_shift.csv",
+      "sha256": "16c5da1a0007b86b98d3474e45715f8547a9228fd7cce369e42fb8ad374ae665",
+      "settings": {
+        "target_minutes": 10,
+        "baseline_end": "2026-09-21T00:00:00-04:00",
+        "as_of": "2026-10-01T00:00:00-04:00",
+        "reviewed_zones": [
+          "A",
+          "B"
+        ],
+        "selected_priority": "P2"
+      },
+      "rows": 12000,
+      "result": "PASS exact full response parity; unreviewed/reviewed/replay",
+      "quality": {
+        "overall": {
+          "total_rows": 12000,
+          "usable_rows": 12000,
+          "excluded_rows": 0,
+          "usable_fraction": 1.0
+        },
+        "selected_priority": {
+          "total_rows": 6000,
+          "usable_rows": 6000,
+          "excluded_rows": 0,
+          "usable_fraction": 1.0
+        },
+        "unassigned_priority_rows": 0,
+        "reasons": []
+      },
+      "baselines": [
+        {
+          "zone": "A",
+          "n": 2000,
+          "late": 305,
+          "p_bar": 0.1525,
+          "status": "ready"
+        },
+        {
+          "zone": "B",
+          "n": 2000,
+          "late": 304,
+          "p_bar": 0.152,
+          "status": "ready"
+        }
+      ],
+      "point_statuses": {
+        "no_signal": 20
+      },
+      "unreviewed_statuses": {
+        "unreviewed_baseline": 20
+      },
+      "signals": [],
+      "resolved_as_of": "2026-10-01T04:00:00+00:00"
+    },
+    {
+      "file": "data/jingyao_synthetic/edge_cases.csv",
+      "sha256": "2891c63336c190844ae4d90eb2a8f669a73ec015c3c3053c4d5f0bd3cfdfd909",
+      "settings": {
+        "target_minutes": 10,
+        "baseline_end": "2026-09-21T00:00:00-04:00",
+        "as_of": "2026-10-01T12:00:00-04:00",
+        "reviewed_zones": [
+          "EDGE",
+          "SHORT",
+          "ZERO",
+          "ONE",
+          "NEW",
+          "BOUNDARY"
+        ],
+        "selected_priority": "P1"
+      },
+      "rows": 5118,
+      "result": "PASS exact full response parity; unreviewed/reviewed/replay",
+      "quality": {
+        "overall": {
+          "total_rows": 5118,
+          "usable_rows": 5107,
+          "excluded_rows": 11,
+          "usable_fraction": 0.997850722938648
+        },
+        "selected_priority": {
+          "total_rows": 5117,
+          "usable_rows": 5107,
+          "excluded_rows": 10,
+          "usable_fraction": 0.998045729919875
+        },
+        "unassigned_priority_rows": 1,
+        "reasons": []
+      },
+      "baselines": [
+        {
+          "zone": "BOUNDARY",
+          "n": 0,
+          "late": 0,
+          "p_bar": null,
+          "status": "insufficient_data"
+        },
+        {
+          "zone": "EDGE",
+          "n": 2000,
+          "late": 200,
+          "p_bar": 0.1,
+          "status": "ready"
+        },
+        {
+          "zone": "NEW",
+          "n": 0,
+          "late": 0,
+          "p_bar": null,
+          "status": "insufficient_data"
+        },
+        {
+          "zone": "ONE",
+          "n": 1000,
+          "late": 1000,
+          "p_bar": 1.0,
+          "status": "insufficient_data"
+        },
+        {
+          "zone": "SHORT",
+          "n": 950,
+          "late": 95,
+          "p_bar": 0.1,
+          "status": "insufficient_data"
+        },
+        {
+          "zone": "ZERO",
+          "n": 1000,
+          "late": 0,
+          "p_bar": 0.0,
+          "status": "insufficient_data"
+        }
+      ],
+      "point_statuses": {
+        "insufficient_data": 7,
+        "provisional_current_day": 1
+      },
+      "unreviewed_statuses": {
+        "insufficient_data": 7,
+        "provisional_current_day": 1
+      },
+      "signals": [],
+      "resolved_as_of": "2026-10-01T16:00:00+00:00"
+    },
+    {
+      "file": "data/jingyao_synthetic/edge_cases.csv",
+      "sha256": "2891c63336c190844ae4d90eb2a8f669a73ec015c3c3053c4d5f0bd3cfdfd909",
+      "settings": {
+        "target_minutes": 10,
+        "baseline_end": "2026-09-21T00:00:00-04:00",
+        "as_of": "2026-10-01T12:00:00-04:00",
+        "reviewed_zones": [
+          "EDGE",
+          "SHORT",
+          "ZERO",
+          "ONE",
+          "NEW",
+          "BOUNDARY"
+        ],
+        "selected_priority": "P2"
+      },
+      "rows": 5118,
+      "result": "PASS expected 422",
+      "error": {
+        "code": "invalid_request",
+        "message": "selected_priority is not present in the imported records.",
+        "fields": [
+          "selected_priority"
+        ]
+      }
+    },
+    {
+      "file": "data/shifeng_synthetic/stable.csv",
+      "sha256": "dbaa6c9fc69fb50b353d4a668d19f577583cea9d9cf8f19b1972b4182a57dd7c",
+      "settings": {
+        "target_minutes": 10,
+        "selected_priority": "P1",
+        "baseline_end": "2026-09-21T00:00:00-04:00",
+        "reviewed_zones": [
+          "A",
+          "B"
+        ],
+        "as_of": "2026-10-01T00:00:00-04:00"
+      },
+      "rows": 12000,
+      "result": "PASS exact full response parity; unreviewed/reviewed/replay",
+      "quality": {
+        "overall": {
+          "total_rows": 12000,
+          "usable_rows": 12000,
+          "excluded_rows": 0,
+          "usable_fraction": 1.0
+        },
+        "selected_priority": {
+          "total_rows": 6000,
+          "usable_rows": 6000,
+          "excluded_rows": 0,
+          "usable_fraction": 1.0
+        },
+        "unassigned_priority_rows": 0,
+        "reasons": []
+      },
+      "baselines": [
+        {
+          "zone": "A",
+          "n": 2000,
+          "late": 277,
+          "p_bar": 0.1385,
+          "status": "ready"
+        },
+        {
+          "zone": "B",
+          "n": 2000,
+          "late": 298,
+          "p_bar": 0.149,
+          "status": "ready"
+        }
+      ],
+      "point_statuses": {
+        "no_signal": 20
+      },
+      "unreviewed_statuses": {
+        "unreviewed_baseline": 20
+      },
+      "signals": [],
+      "resolved_as_of": "2026-10-01T04:00:00+00:00"
+    },
+    {
+      "file": "data/shifeng_synthetic/stable.csv",
+      "sha256": "dbaa6c9fc69fb50b353d4a668d19f577583cea9d9cf8f19b1972b4182a57dd7c",
+      "settings": {
+        "target_minutes": 10,
+        "selected_priority": "P2",
+        "baseline_end": "2026-09-21T00:00:00-04:00",
+        "reviewed_zones": [
+          "A",
+          "B"
+        ],
+        "as_of": "2026-10-01T00:00:00-04:00"
+      },
+      "rows": 12000,
+      "result": "PASS exact full response parity; unreviewed/reviewed/replay",
+      "quality": {
+        "overall": {
+          "total_rows": 12000,
+          "usable_rows": 12000,
+          "excluded_rows": 0,
+          "usable_fraction": 1.0
+        },
+        "selected_priority": {
+          "total_rows": 6000,
+          "usable_rows": 6000,
+          "excluded_rows": 0,
+          "usable_fraction": 1.0
+        },
+        "unassigned_priority_rows": 0,
+        "reasons": []
+      },
+      "baselines": [
+        {
+          "zone": "A",
+          "n": 2000,
+          "late": 311,
+          "p_bar": 0.1555,
+          "status": "ready"
+        },
+        {
+          "zone": "B",
+          "n": 2000,
+          "late": 313,
+          "p_bar": 0.1565,
+          "status": "ready"
+        }
+      ],
+      "point_statuses": {
+        "no_signal": 20
+      },
+      "unreviewed_statuses": {
+        "unreviewed_baseline": 20
+      },
+      "signals": [],
+      "resolved_as_of": "2026-10-01T04:00:00+00:00"
+    },
+    {
+      "file": "data/shifeng_synthetic/zone_shift.csv",
+      "sha256": "a5094f5d4e03c92aeafc55b1bb5fa1d53f88f7dce7ced9509c1ff13c8efa00bf",
+      "settings": {
+        "target_minutes": 10,
+        "selected_priority": "P1",
+        "baseline_end": "2026-09-21T00:00:00-04:00",
+        "reviewed_zones": [
+          "A",
+          "B"
+        ],
+        "as_of": "2026-10-01T00:00:00-04:00"
+      },
+      "rows": 12000,
+      "result": "PASS exact full response parity; unreviewed/reviewed/replay",
+      "quality": {
+        "overall": {
+          "total_rows": 12000,
+          "usable_rows": 12000,
+          "excluded_rows": 0,
+          "usable_fraction": 1.0
+        },
+        "selected_priority": {
+          "total_rows": 6000,
+          "usable_rows": 6000,
+          "excluded_rows": 0,
+          "usable_fraction": 1.0
+        },
+        "unassigned_priority_rows": 0,
+        "reasons": []
+      },
+      "baselines": [
+        {
+          "zone": "A",
+          "n": 2000,
+          "late": 277,
+          "p_bar": 0.1385,
+          "status": "ready"
+        },
+        {
+          "zone": "B",
+          "n": 2000,
+          "late": 298,
+          "p_bar": 0.149,
+          "status": "ready"
+        }
+      ],
+      "point_statuses": {
+        "high": 10,
+        "no_signal": 10
+      },
+      "unreviewed_statuses": {
+        "unreviewed_baseline": 20
+      },
+      "signals": [
+        {
+          "zone": "A",
+          "date": "2026-09-21",
+          "n": 100,
+          "late": 33,
+          "rate": 0.33,
+          "lower": 0.03487279556023912,
+          "upper": 0.2421272044397609,
+          "status": "high"
+        },
+        {
+          "zone": "A",
+          "date": "2026-09-22",
+          "n": 100,
+          "late": 42,
+          "rate": 0.42,
+          "lower": 0.03487279556023912,
+          "upper": 0.2421272044397609,
+          "status": "high"
+        },
+        {
+          "zone": "A",
+          "date": "2026-09-23",
+          "n": 100,
+          "late": 39,
+          "rate": 0.39,
+          "lower": 0.03487279556023912,
+          "upper": 0.2421272044397609,
+          "status": "high"
+        },
+        {
+          "zone": "A",
+          "date": "2026-09-24",
+          "n": 100,
+          "late": 48,
+          "rate": 0.48,
+          "lower": 0.03487279556023912,
+          "upper": 0.2421272044397609,
+          "status": "high"
+        },
+        {
+          "zone": "A",
+          "date": "2026-09-25",
+          "n": 100,
+          "late": 41,
+          "rate": 0.41,
+          "lower": 0.03487279556023912,
+          "upper": 0.2421272044397609,
+          "status": "high"
+        },
+        {
+          "zone": "A",
+          "date": "2026-09-26",
+          "n": 100,
+          "late": 38,
+          "rate": 0.38,
+          "lower": 0.03487279556023912,
+          "upper": 0.2421272044397609,
+          "status": "high"
+        },
+        {
+          "zone": "A",
+          "date": "2026-09-27",
+          "n": 100,
+          "late": 39,
+          "rate": 0.39,
+          "lower": 0.03487279556023912,
+          "upper": 0.2421272044397609,
+          "status": "high"
+        },
+        {
+          "zone": "A",
+          "date": "2026-09-28",
+          "n": 100,
+          "late": 28,
+          "rate": 0.28,
+          "lower": 0.03487279556023912,
+          "upper": 0.2421272044397609,
+          "status": "high"
+        },
+        {
+          "zone": "A",
+          "date": "2026-09-29",
+          "n": 100,
+          "late": 40,
+          "rate": 0.4,
+          "lower": 0.03487279556023912,
+          "upper": 0.2421272044397609,
+          "status": "high"
+        },
+        {
+          "zone": "A",
+          "date": "2026-09-30",
+          "n": 100,
+          "late": 39,
+          "rate": 0.39,
+          "lower": 0.03487279556023912,
+          "upper": 0.2421272044397609,
+          "status": "high"
+        }
+      ],
+      "resolved_as_of": "2026-10-01T04:00:00+00:00"
+    },
+    {
+      "file": "data/shifeng_synthetic/zone_shift.csv",
+      "sha256": "a5094f5d4e03c92aeafc55b1bb5fa1d53f88f7dce7ced9509c1ff13c8efa00bf",
+      "settings": {
+        "target_minutes": 10,
+        "selected_priority": "P2",
+        "baseline_end": "2026-09-21T00:00:00-04:00",
+        "reviewed_zones": [
+          "A",
+          "B"
+        ],
+        "as_of": "2026-10-01T00:00:00-04:00"
+      },
+      "rows": 12000,
+      "result": "PASS exact full response parity; unreviewed/reviewed/replay",
+      "quality": {
+        "overall": {
+          "total_rows": 12000,
+          "usable_rows": 12000,
+          "excluded_rows": 0,
+          "usable_fraction": 1.0
+        },
+        "selected_priority": {
+          "total_rows": 6000,
+          "usable_rows": 6000,
+          "excluded_rows": 0,
+          "usable_fraction": 1.0
+        },
+        "unassigned_priority_rows": 0,
+        "reasons": []
+      },
+      "baselines": [
+        {
+          "zone": "A",
+          "n": 2000,
+          "late": 311,
+          "p_bar": 0.1555,
+          "status": "ready"
+        },
+        {
+          "zone": "B",
+          "n": 2000,
+          "late": 313,
+          "p_bar": 0.1565,
+          "status": "ready"
+        }
+      ],
+      "point_statuses": {
+        "no_signal": 20
+      },
+      "unreviewed_statuses": {
+        "unreviewed_baseline": 20
+      },
+      "signals": [],
+      "resolved_as_of": "2026-10-01T04:00:00+00:00"
+    },
+    {
+      "file": "data/shifeng_synthetic/edge_cases.csv",
+      "sha256": "74dadba769481a3094cd07186c0ba75f7abeb5282f78f0e75568bc07912171df",
+      "settings": {
+        "target_minutes": 10,
+        "selected_priority": "P1",
+        "baseline_end": "2026-09-21T00:00:00-04:00",
+        "reviewed_zones": [
+          "A",
+          "B",
+          "C",
+          "NEW",
+          "SHORT"
+        ],
+        "as_of": "2026-10-01T12:00:00-04:00"
+      },
+      "rows": 2934,
+      "result": "PASS exact full response parity; unreviewed/reviewed/replay",
+      "quality": {
+        "overall": {
+          "total_rows": 2934,
+          "usable_rows": 2922,
+          "excluded_rows": 12,
+          "usable_fraction": 0.9959100204498977
+        },
+        "selected_priority": {
+          "total_rows": 2932,
+          "usable_rows": 2922,
+          "excluded_rows": 10,
+          "usable_fraction": 0.9965893587994543
+        },
+        "unassigned_priority_rows": 1,
+        "reasons": []
+      },
+      "baselines": [
+        {
+          "zone": "A",
+          "n": 2000,
+          "late": 200,
+          "p_bar": 0.1,
+          "status": "ready"
+        },
+        {
+          "zone": "B",
+          "n": 200,
+          "late": 0,
+          "p_bar": 0.0,
+          "status": "insufficient_data"
+        },
+        {
+          "zone": "C",
+          "n": 200,
+          "late": 200,
+          "p_bar": 1.0,
+          "status": "insufficient_data"
+        },
+        {
+          "zone": "NEW",
+          "n": 0,
+          "late": 0,
+          "p_bar": null,
+          "status": "insufficient_data"
+        },
+        {
+          "zone": "SHORT",
+          "n": 190,
+          "late": 19,
+          "p_bar": 0.1,
+          "status": "insufficient_data"
+        }
+      ],
+      "point_statuses": {
+        "no_signal": 1,
+        "insufficient_data": 8,
+        "provisional_current_day": 1
+      },
+      "unreviewed_statuses": {
+        "unreviewed_baseline": 1,
+        "insufficient_data": 8,
+        "provisional_current_day": 1
+      },
+      "signals": [],
+      "resolved_as_of": "2026-10-01T16:00:00+00:00"
+    },
+    {
+      "file": "data/shifeng_synthetic/edge_cases.csv",
+      "sha256": "74dadba769481a3094cd07186c0ba75f7abeb5282f78f0e75568bc07912171df",
+      "settings": {
+        "target_minutes": 10,
+        "selected_priority": "P2",
+        "baseline_end": "2026-09-21T00:00:00-04:00",
+        "reviewed_zones": [
+          "A",
+          "B",
+          "C",
+          "NEW",
+          "SHORT"
+        ],
+        "as_of": "2026-10-01T12:00:00-04:00"
+      },
+      "rows": 2934,
+      "result": "PASS exact full response parity; unreviewed/reviewed/replay",
+      "quality": {
+        "overall": {
+          "total_rows": 2934,
+          "usable_rows": 2922,
+          "excluded_rows": 12,
+          "usable_fraction": 0.9959100204498977
+        },
+        "selected_priority": {
+          "total_rows": 1,
+          "usable_rows": 0,
+          "excluded_rows": 1,
+          "usable_fraction": 0.0
+        },
+        "unassigned_priority_rows": 1,
+        "reasons": [
+          "no_usable_selected_records"
+        ]
+      },
+      "baselines": [],
+      "point_statuses": {},
+      "unreviewed_statuses": {},
+      "signals": [],
+      "resolved_as_of": "2026-10-01T16:00:00+00:00"
+    },
+    {
+      "file": "data/real_nyc_brooklyn_queens_sev2.csv",
+      "sha256": "772de0227ccd1a6849e18d611c12a0cd249dcad3bab1985f389ecabf41c7b5a3",
+      "settings": {
+        "target_minutes": 10,
+        "selected_priority": "2",
+        "baseline_end": "2026-08-21T00:00:00-04:00",
+        "as_of": "2026-10-02T00:00:00-04:00",
+        "reviewed_zones": [
+          "BROOKLYN",
+          "QUEENS"
+        ]
+      },
+      "rows": 26209,
+      "result": "PASS exact full response parity; unreviewed/reviewed/replay",
+      "quality": {
+        "overall": {
+          "total_rows": 26209,
+          "usable_rows": 26209,
+          "excluded_rows": 0,
+          "usable_fraction": 1.0
+        },
+        "selected_priority": {
+          "total_rows": 26209,
+          "usable_rows": 26209,
+          "excluded_rows": 0,
+          "usable_fraction": 1.0
+        },
+        "unassigned_priority_rows": 0,
+        "reasons": []
+      },
+      "baselines": [
+        {
+          "zone": "BROOKLYN",
+          "n": 5106,
+          "late": 1134,
+          "p_bar": 0.22209165687426558,
+          "status": "ready"
+        },
+        {
+          "zone": "QUEENS",
+          "n": 3632,
+          "late": 1254,
+          "p_bar": 0.34526431718061673,
+          "status": "ready"
+        }
+      ],
+      "point_statuses": {
+        "no_signal": 74,
+        "high": 8
+      },
+      "unreviewed_statuses": {
+        "unreviewed_baseline": 82
+      },
+      "signals": [
+        {
+          "zone": "BROOKLYN",
+          "date": "2026-09-04",
+          "n": 286,
+          "late": 85,
+          "rate": 0.2972027972027972,
+          "lower": 0.14835752440107944,
+          "upper": 0.29582578934745174,
+          "status": "high"
+        },
+        {
+          "zone": "BROOKLYN",
+          "date": "2026-09-07",
+          "n": 328,
+          "late": 100,
+          "rate": 0.3048780487804878,
+          "lower": 0.15323995658816858,
+          "upper": 0.29094335716036257,
+          "status": "high"
+        },
+        {
+          "zone": "BROOKLYN",
+          "date": "2026-09-11",
+          "n": 264,
+          "late": 84,
+          "rate": 0.3181818181818182,
+          "lower": 0.14534673858948394,
+          "upper": 0.2988365751590472,
+          "status": "high"
+        },
+        {
+          "zone": "BROOKLYN",
+          "date": "2026-09-14",
+          "n": 257,
+          "late": 81,
+          "rate": 0.3151750972762646,
+          "lower": 0.14430859590658524,
+          "upper": 0.2998747178419459,
+          "status": "high"
+        },
+        {
+          "zone": "BROOKLYN",
+          "date": "2026-09-29",
+          "n": 253,
+          "late": 78,
+          "rate": 0.308300395256917,
+          "lower": 0.14369612140330534,
+          "upper": 0.3004871923452258,
+          "status": "high"
+        },
+        {
+          "zone": "BROOKLYN",
+          "date": "2026-09-30",
+          "n": 281,
+          "late": 87,
+          "rate": 0.3096085409252669,
+          "lower": 0.1477044192431754,
+          "upper": 0.29647889450535575,
+          "status": "high"
+        },
+        {
+          "zone": "QUEENS",
+          "date": "2026-09-06",
+          "n": 181,
+          "late": 94,
+          "rate": 0.5193370165745856,
+          "lower": 0.23924357970735427,
+          "upper": 0.4512850546538792,
+          "status": "high"
+        },
+        {
+          "zone": "QUEENS",
+          "date": "2026-09-15",
+          "n": 159,
+          "late": 74,
+          "rate": 0.46540880503144655,
+          "lower": 0.23214636193141866,
+          "upper": 0.4583822724298148,
+          "status": "high"
+        }
+      ],
+      "resolved_as_of": "2026-10-02T04:00:00+00:00"
+    }
+  ],
+  "limitations": [
+    "No browser or deployment acceptance is claimed by this runner.",
+    "Reviewed zones are explicit software-test confirmations, not evidence of operational human review.",
+    "Real NYC source is precleaned: app exclusions do not describe upstream exclusions.",
+    "NYC first-assignment-to-first-arrival incident metric differs from synthetic unit-response records.",
+    "Jingyao edge contains no P2; its P2 request is expected to fail unknown-category validation."
+  ]
+}
