@@ -1,18 +1,19 @@
 import { useMemo, useState } from 'react'
 import { COLUMNS, parseIncidents, toCsv } from '../csv.js'
+import { reasonText, reasonsText } from '../status.js'
 import { nyLocalToIso, showNy } from '../time.js'
 
 const PREVIEW_ROWS = 100
 const EMPTY_FORM = { incident_id: '', zone: '', priority: '', dispatched_at: '', on_scene_at: '' }
 
-export default function DataSettings({ records, source, settings, result, busy, onRecords, onSettings, onRun, onShowChart }) {
+export default function DataSettings({ records, source, settings, res, busy, onRecords, onSettings, onRun, onShowChart }) {
   const [importError, setImportError] = useState('')
   const [form, setForm] = useState(null)
 
   const priorities = useMemo(() => [...new Set(records.map((r) => r.priority).filter(Boolean))].sort(), [records])
   const excludedByRow = useMemo(
-    () => new Map((result?.excluded_records ?? []).map((e) => [e.row, e.reasons])),
-    [result]
+    () => new Map((res?.excluded_records ?? []).map((e) => [e.row_number, e.reasons])),
+    [res]
   )
 
   async function importFile(e) {
@@ -127,15 +128,17 @@ export default function DataSettings({ records, source, settings, result, busy, 
         </div>
         <div className="row">
           <button className="primary" onClick={onRun} disabled={busy}>{busy ? 'Running…' : 'Run analysis'}</button>
-          {result && <button onClick={onShowChart}>View zone chart →</button>}
-          {!result && records.length > 0 && <span className="muted">No current result: run the analysis after any change.</span>}
+          {res && <button onClick={onShowChart}>View zone chart →</button>}
+          {!res && records.length > 0 && <span className="muted">No current result: run the analysis after any change.</span>}
         </div>
-        {result?.meta?.message && <p className="notice">{result.meta.message}</p>}
+        {res?.quality.reasons.length > 0 && (
+          <p className="notice">{res.quality.reasons.map(reasonText).join(' ')} There is no result to chart; no rate is shown as zero.</p>
+        )}
       </section>
 
       <section className="panel">
         <h2>3. Record preview</h2>
-        {result && (
+        {res && (
           <p className="muted">
             Rows the server excluded show the reason. Excluded rows are left out of every count, rate and limit.
           </p>
@@ -159,7 +162,7 @@ export default function DataSettings({ records, source, settings, result, busy, 
                       <td>{r.priority}</td>
                       <td title={r.dispatched_at}>{r.dispatched_at ? showNy(r.dispatched_at) : <em>missing</em>}</td>
                       <td title={r.on_scene_at}>{r.on_scene_at ? showNy(r.on_scene_at) : <em>missing</em>}</td>
-                      <td>{reasons ? reasons.join('; ') : ''}</td>
+                      <td>{reasons ? reasonsText(reasons) : ''}</td>
                     </tr>
                   )
                 })}
@@ -168,10 +171,10 @@ export default function DataSettings({ records, source, settings, result, busy, 
             {records.length > PREVIEW_ROWS && <p className="muted">Showing the first {PREVIEW_ROWS} of {records.length} rows.</p>}
           </div>
         )}
-        {result && result.excluded_records.length > 0 && (
+        {res && res.excluded_records.length > 0 && (
           <details>
-            <summary>All {result.excluded_records.length} excluded rows</summary>
-            <ExcludedList items={result.excluded_records} />
+            <summary>All {res.excluded_records.length} excluded rows (all priorities)</summary>
+            <ExcludedList items={res.excluded_records} />
           </details>
         )}
       </section>
@@ -183,7 +186,9 @@ export function ExcludedList({ items }) {
   return (
     <ul className="excluded-list">
       {items.map((e, i) => (
-        <li key={i}>Row {e.row} ({e.incident_id || 'no id'}): {e.reasons.join('; ')}</li>
+        <li key={i}>
+          Row {e.row_number} ({e.incident_id ?? 'no valid id'}, zone {e.zone ?? '?'}, {e.priority ?? 'no priority'}): {reasonsText(e.reasons)}
+        </li>
       ))}
     </ul>
   )

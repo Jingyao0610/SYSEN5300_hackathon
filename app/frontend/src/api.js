@@ -1,6 +1,6 @@
 // The ONLY place the API base URL lives. Set VITE_API_URL in .env.local (dev)
 // or in the build environment (deploy). Never commit the course server URL.
-import { mockAnalyze } from './mock/fixtures.js'
+// Request/response shapes: docs/interfaces.md v1.0.
 
 export const API_URL = (import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000').replace(/\/$/, '')
 
@@ -8,11 +8,15 @@ export const API_URL = (import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000')
 // A failed real call is shown as an error. It NEVER falls back to mock data.
 export const MOCK = import.meta.env.VITE_MOCK === '1'
 
+const loadMock = () => import('./mock/index.js')
+
+/** An error response: { error: { code, message, fields } } (interfaces section 5). */
 export class ApiError extends Error {
-  constructor(status, detail) {
-    super(typeof detail === 'string' ? detail : `API returned HTTP ${status}`)
+  constructor(status, error) {
+    super(error?.message || `API returned HTTP ${status}`)
     this.status = status
-    this.detail = detail
+    this.code = error?.code ?? null
+    this.fields = error?.fields ?? []
   }
 }
 
@@ -21,31 +25,30 @@ async function request(path, options) {
   try {
     res = await fetch(`${API_URL}${path}`, options)
   } catch {
-    throw new ApiError(0, `Cannot reach the API at ${API_URL}. Is the backend running?`)
+    throw new ApiError(0, { message: `Cannot reach the API at ${API_URL}. Is the backend running?` })
   }
   let body = null
   try {
     body = await res.json()
   } catch {
-    // non-JSON body: keep null and report the status below
+    // non-JSON body: report the status below
   }
-  if (!res.ok) throw new ApiError(res.status, body?.detail ?? `API returned HTTP ${res.status}`)
+  if (!res.ok) throw new ApiError(res.status, body?.error)
   return body
 }
 
-/** GET /health */
+/** GET /health -> { status, schema_version, analysis_mode } */
 export function health() {
-  if (MOCK) return Promise.resolve({ status: 'mock' })
+  if (MOCK) return Promise.resolve({ status: 'ok', schema_version: '1.0', analysis_mode: 'mock' })
   return request('/health')
 }
 
 /**
- * POST /analyze. `req` = { records, target_minutes, selected_priority,
- * baseline_end, reviewed_zones, as_of? }. Every statistic in the response is
+ * POST /analyze with the six v1.0 fields. Every statistic in the response is
  * computed by app/qc.py on the server; this file only moves JSON.
  */
-export function analyze(req, mockScenario) {
-  if (MOCK) return Promise.resolve(mockAnalyze(req, mockScenario))
+export async function analyze(req, mockScenario) {
+  if (MOCK) return (await loadMock()).mockAnalyze(req, mockScenario)
   return request('/analyze', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -53,9 +56,8 @@ export function analyze(req, mockScenario) {
   })
 }
 
-/** Turn a FastAPI 422 `detail` (string or list of {loc, msg}) into lines of text. */
-export function errorLines(err) {
-  const d = err?.detail
-  if (Array.isArray(d)) return d.map((e) => `${(e.loc || []).slice(1).join('.') || 'request'}: ${e.msg}`)
-  return [err?.message || String(err)]
+/** Scenario list and CSV text for MOCK mode only. */
+export async function mockScenarios() {
+  const m = await loadMock()
+  return { scenarios: m.MOCK_SCENARIOS, csv: m.scenarioCsv }
 }

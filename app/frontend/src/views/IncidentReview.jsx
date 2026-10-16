@@ -1,11 +1,12 @@
 import { useMemo, useState } from 'react'
 import { showNy } from '../time.js'
 import { ExcludedList } from './DataSettings.jsx'
+import { reasonText } from '../status.js'
 
-export default function IncidentReview({ result, focus, onFocus, onBack }) {
+export default function IncidentReview({ res, focus, onFocus, onBack }) {
   const [sortBy, setSortBy] = useState('minutes')
 
-  const incidents = result?.late_incidents ?? []
+  const incidents = res?.late_incidents ?? []
   const zones = useMemo(() => [...new Set(incidents.map((i) => i.zone))].sort(), [incidents])
   const dates = useMemo(
     () => [...new Set(incidents.filter((i) => !focus.zone || i.zone === focus.zone).map((i) => i.date))].sort(),
@@ -21,7 +22,7 @@ export default function IncidentReview({ result, focus, onFocus, onBack }) {
     )
   }, [incidents, focus, sortBy])
 
-  if (!result) {
+  if (!res) {
     return (
       <section className="panel">
         <p>No current analysis. Run it on the Data &amp; Settings page.</p>
@@ -29,14 +30,16 @@ export default function IncidentReview({ result, focus, onFocus, onBack }) {
     )
   }
 
-  const target = result.meta.target_minutes
+  const target = res.meta.target_minutes
+  const sel = res.quality.selected_priority
+  const all = res.quality.overall
 
   return (
     <>
       <section className="panel">
         <h2>Late completed responses</h2>
         <p className="muted">
-          Responses that took longer than the {target}-minute target, for priority {result.meta.selected_priority}.
+          Responses that took longer than the {target}-minute target, for priority {res.meta.selected_priority}, from both the baseline and monitoring periods.
           A late response is a case to review, not by itself a statistical signal. Only usable records appear here.
         </p>
         <div className="row">
@@ -70,12 +73,12 @@ export default function IncidentReview({ result, focus, onFocus, onBack }) {
           <div className="scroll">
             <table>
               <thead>
-                <tr><th>Incident</th><th>Zone</th><th>Date</th><th>Dispatched</th><th>On scene</th><th>Response (min)</th></tr>
+                <tr><th>Row</th><th>Incident</th><th>Zone</th><th>Date</th><th>Period</th><th>Dispatched</th><th>On scene</th><th>Response (min)</th></tr>
               </thead>
               <tbody>
                 {rows.map((i) => (
-                  <tr key={i.incident_id}>
-                    <td>{i.incident_id}</td><td>{i.zone}</td><td>{i.date}</td>
+                  <tr key={i.row_number}>
+                    <td>{i.row_number}</td><td>{i.incident_id}</td><td>{i.zone}</td><td>{i.date}</td><td>{i.phase}</td>
                     <td>{showNy(i.dispatched_at)}</td><td>{showNy(i.on_scene_at)}</td>
                     <td className="num">{i.response_minutes.toFixed(2)}</td>
                   </tr>
@@ -89,16 +92,18 @@ export default function IncidentReview({ result, focus, onFocus, onBack }) {
       <section className="panel">
         <h2>Record coverage</h2>
         <p>
-          {`${result.quality.selected_priority.usable} usable and ${result.quality.selected_priority.excluded} excluded of ${result.quality.selected_priority.total} rows for this priority.`}
+          {`Selected priority: ${sel.usable_rows} usable and ${sel.excluded_rows} excluded of ${sel.total_rows} rows. All imported rows: ${all.usable_rows} usable and ${all.excluded_rows} excluded of ${all.total_rows}.`}
+          {res.quality.unassigned_priority_rows > 0 && ` ${res.quality.unassigned_priority_rows} row(s) had no valid priority.`}
         </p>
         <p className="muted">
           This page only knows about responses that were logged with both timestamps. Missing or incorrect logs can
           bias the late rate, and cancelled or still-open calls are not included.
         </p>
-        {result.excluded_records.length > 0 && (
+        {res.quality.reasons.length > 0 && <p className="notice">{res.quality.reasons.map(reasonText).join(' ')}</p>}
+        {res.excluded_records.length > 0 && (
           <details>
-            <summary>{result.excluded_records.length} excluded row(s) and why</summary>
-            <ExcludedList items={result.excluded_records} />
+            <summary>{res.excluded_records.length} excluded row(s), all priorities, and why</summary>
+            <ExcludedList items={res.excluded_records} />
           </details>
         )}
       </section>

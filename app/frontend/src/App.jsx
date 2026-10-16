@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react'
-import { API_URL, MOCK, analyze, errorLines, health } from './api.js'
-import { MOCK_SCENARIOS } from './mock/fixtures.js'
+import { useEffect, useRef, useState } from 'react'
+import { API_URL, MOCK, analyze, health, mockScenarios } from './api.js'
+import { parseIncidents } from './csv.js'
+import { pct } from './status.js'
 import { TZ, nyLocalToIso, nyMidnightIso, showNy } from './time.js'
 import DataSettings from './views/DataSettings.jsx'
 import ZoneMonitoring from './views/ZoneMonitoring.jsx'
@@ -19,15 +20,23 @@ export default function App() {
   const [records, setRecords] = useState([])
   const [source, setSource] = useState('')
   const [settings, setSettings] = useState(DEFAULT_SETTINGS)
-  const [result, setResult] = useState(null)
+  const [result, setResult] = useState(null) // { res, serverClock }
   const [busy, setBusy] = useState(false)
   const [errors, setErrors] = useState([])
   const [focus, setFocus] = useState({ zone: '', date: '' })
-  const [api, setApi] = useState('checking')
-  const [scenario, setScenario] = useState('signals')
+  const [api, setApi] = useState({ state: 'checking' })
+  const [mock, setMock] = useState(null) // { scenarios, csv, picked }
+  const errorRef = useRef(null)
 
   useEffect(() => {
-    health().then(() => setApi('ok')).catch(() => setApi('down'))
+    if (errors.length) errorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  }, [errors])
+
+  useEffect(() => {
+    health()
+      .then((h) => setApi({ state: 'ok', mode: h.analysis_mode }))
+      .catch(() => setApi({ state: 'down' }))
+    if (MOCK) mockScenarios().then((m) => setMock({ ...m, picked: '' }))
   }, [])
 
   // Any change to data or settings makes the old result stale: drop it, and
@@ -36,12 +45,25 @@ export default function App() {
   const changeRecords = (next, label) => { setRecords(next); if (label !== undefined) setSource(label); invalidate() }
   const changeSettings = (patch) => { setSettings((s) => ({ ...s, ...patch })); invalidate() }
 
+  // MOCK only: load a scenario's records and its fixed settings into the session.
+  function pickScenario(name) {
+    const sc = mock.scenarios[name]
+    setMock({ ...mock, picked: name })
+    if (!sc) return
+    changeRecords(parseIncidents(mock.csv(name)), `MOCK scenario "${name}"`)
+    changeSettings({
+      selected_priority: sc.settings.selected_priority,
+      target_minutes: String(sc.settings.target_minutes),
+      baseline_end: sc.settings.baseline_end.slice(0, 10),
+      as_of: sc.settings.as_of.slice(0, 19), // already New York local time
+    })
+  }
+
   function buildRequest(reviewedZones, asOf) {
     const problems = []
     const target = Number(settings.target_minutes)
-    if (records.length === 0) problems.push('Import a CSV or add at least one response first.')
     if (!settings.selected_priority) problems.push('Choose a priority.')
-    if (!(target > 0)) problems.push('Target minutes must be a positive number.')
+    if (!(target > 0) || !Number.isFinite(target)) problems.push('Target minutes must be a positive number.')
     if (!settings.baseline_end) problems.push('Choose the baseline end date.')
     if (problems.length) throw problems
     const req = {
@@ -67,10 +89,15 @@ export default function App() {
     setBusy(true)
     setErrors([])
     try {
-      setResult(await analyze(req, scenario))
+      const res = await analyze(req, mock?.picked)
+      // a review re-run reuses the earlier as_of, so it keeps the earlier label
+      setResult({ res, serverClock: asOf ? !!result?.serverClock : !req.as_of })
     } catch (e) {
       setResult(null)
-      setErrors([e.status === 422 ? 'The API rejected the request (HTTP 422):' : 'Analysis failed:', ...errorLines(e)])
+      const head = e.status === 422 ? 'The API rejected the request (HTTP 422).'
+        : e.status === 503 ? 'The analysis service is not available yet (HTTP 503).'
+        : 'Analysis failed.'
+      setErrors([head, e.message, ...(e.fields?.length ? [`Field(s): ${e.fields.join(', ')}`] : [])])
     } finally {
       setBusy(false)
     }
@@ -79,9 +106,9 @@ export default function App() {
   // Confirming a zone's baseline re-runs the analysis at the SAME as_of, so
   // the only thing that changes is which zones may receive a verdict.
   function toggleReviewed(zone) {
-    const current = result?.meta?.reviewed_zones ?? []
+    const current = result?.res.meta.reviewed_zones ?? []
     const next = current.includes(zone) ? current.filter((z) => z !== zone) : [...current, zone]
-    run(next, result.meta.as_of)
+    run(next, result.res.meta.as_of)
   }
 
   function viewIncidents(zone, date) {
@@ -89,17 +116,28 @@ export default function App() {
     setPage('incidents')
   }
 
+  const res = result?.res ?? null
+  const showMock = MOCK || res?.meta?.is_mock === true
+
   return (
     <div className="app">
-      {MOCK && (
+      {showMock && (
         <div className="mock-banner" role="alert">
-          <strong>MOCK DATA — not a real analysis.</strong> Fixed fixtures from the SPEC known answers; the API is not called.
-          <label>
-            Scenario{' '}
-            <select value={scenario} onChange={(e) => { setScenario(e.target.value); invalidate() }}>
-              {Object.entries(MOCK_SCENARIOS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-            </select>
-          </label>
+          <strong>MOCK DATA — not a live analysis.</strong>
+          <span>
+            {MOCK
+              ? 'Precomputed core output for fixed synthetic scenarios; the API is not called and your edits are not analysed.'
+              : 'The API reported is_mock = true.'}
+          </span>
+          {MOCK && mock && (
+            <label>
+              Scenario{' '}
+              <select value={mock.picked} onChange={(e) => pickScenario(e.target.value)}>
+                <option value="">— load a scenario —</option>
+                {Object.entries(mock.scenarios).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
+              </select>
+            </label>
+          )}
         </div>
       )}
 
@@ -121,7 +159,7 @@ export default function App() {
       </header>
 
       {errors.length > 0 && (
-        <div className="error" role="alert">
+        <div className="error" role="alert" ref={errorRef}>
           {errors.map((e, i) => <div key={i}>{e}</div>)}
         </div>
       )}
@@ -129,21 +167,19 @@ export default function App() {
       <main>
         {page === 'data' && (
           <DataSettings
-            records={records} source={source} settings={settings} result={result} busy={busy}
+            records={records} source={source} settings={settings} res={res} busy={busy}
             onRecords={changeRecords} onSettings={changeSettings} onRun={() => run([])}
             onShowChart={() => setPage('zones')}
           />
         )}
         {page === 'zones' && (
           <ZoneMonitoring
-            result={result} busy={busy} onToggleReviewed={toggleReviewed}
+            res={res} busy={busy} onToggleReviewed={toggleReviewed}
             onViewIncidents={viewIncidents} onBack={() => setPage('data')}
           />
         )}
         {page === 'incidents' && (
-          <IncidentReview
-            result={result} focus={focus} onFocus={setFocus} onBack={() => setPage('zones')}
-          />
+          <IncidentReview res={res} focus={focus} onFocus={setFocus} onBack={() => setPage('zones')} />
         )}
       </main>
     </div>
@@ -151,28 +187,33 @@ export default function App() {
 }
 
 function ContextBar({ result, settings, records, api }) {
-  const m = result?.meta
-  const q = result?.quality
+  const m = result?.res.meta
+  const q = result?.res.quality
+  const scope = (c) => `${c.usable_rows} usable / ${c.excluded_rows} excluded of ${c.total_rows}`
   return (
     <dl className="context">
       <div><dt>Time zone</dt><dd>{TZ}</dd></div>
       <div>
         <dt>Analysis as of</dt>
-        <dd>{m ? `${showNy(m.as_of)}${m.as_of_source === 'server' ? ' (server now)' : ''}` : 'not run'}</dd>
+        <dd>{m ? `${showNy(m.as_of)}${result.serverClock ? ' (server clock)' : ''}` : 'not run'}</dd>
       </div>
       <div><dt>Target</dt><dd>{`${m?.target_minutes ?? settings.target_minutes} min`}</dd></div>
       <div><dt>Priority</dt><dd>{m?.selected_priority ?? (settings.selected_priority || '—')}</dd></div>
       <div>
-        <dt>Usable / excluded</dt>
-        <dd>
-          {q
-            ? `${q.selected_priority.usable} / ${q.selected_priority.excluded} of ${q.selected_priority.total} (priority) · ${q.all_rows.usable} / ${q.all_rows.excluded} of ${q.all_rows.total} (all rows)`
-            : `${records.length} rows loaded, not analysed`}
-        </dd>
+        <dt>Selected priority rows</dt>
+        <dd>{q ? `${scope(q.selected_priority)} (${pct(q.selected_priority.usable_fraction)} usable)` : `${records.length} rows loaded, not analysed`}</dd>
+      </div>
+      <div>
+        <dt>All imported rows</dt>
+        <dd>{q ? `${scope(q.overall)} (${pct(q.overall.usable_fraction)} usable)` : '—'}</dd>
       </div>
       <div>
         <dt>API</dt>
-        <dd className={`api ${api}`}>{MOCK ? 'MOCK (not called)' : api === 'ok' ? 'connected' : api === 'down' ? `unreachable at ${API_URL}` : 'checking…'}</dd>
+        <dd className={`api ${api.state}`}>
+          {MOCK ? 'MOCK (not called)'
+            : api.state === 'ok' ? `connected (${api.mode ?? 'unknown'} mode)`
+            : api.state === 'down' ? `unreachable at ${API_URL}` : 'checking…'}
+        </dd>
       </div>
     </dl>
   )

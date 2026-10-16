@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { pct, statusInfo } from '../status.js'
+import { pct, reasonsText, statusInfo } from '../status.js'
 
 // Daily late-rate p chart for ONE zone. Plots only what the API returned:
 // rate, lower, upper per day and the zone's p_bar. No statistics here.
@@ -97,7 +97,7 @@ export default function PChart({ points, pBar, zone }) {
       <figcaption className="key">
         <span><svg width="22" height="10"><line x1="0" x2="22" y1="5" y2="5" className="keyline center" /></svg>p̄ (baseline late rate)</span>
         <span><svg width="22" height="10"><line x1="0" x2="22" y1="5" y2="5" className="keyline limit" /></svg>control limits for that day&rsquo;s n</span>
-        {['high', 'low', 'no_signal', 'provisional', 'unreviewed_baseline', 'insufficient_data', 'baseline'].map((s) => (
+        {['high', 'low', 'no_signal', 'provisional_current_day', 'unreviewed_baseline', 'insufficient_data', 'baseline'].map((s) => (
           <span key={s}><svg width="14" height="14"><Marker cx={7} cy={7} status={s} small /></svg>{statusInfo(s).label}</span>
         ))}
       </figcaption>
@@ -125,7 +125,7 @@ function Tooltip({ p, pBar, left }) {
       <div>{`Late rate ${pct(p.rate)} = ${p.late} late / ${p.n} responses`}</div>
       <div>{`Limits ${pct(p.lower)} – ${pct(p.upper)} · p̄ ${pct(pBar)}`}</div>
       <div>{`${info.icon} ${info.label}`}</div>
-      {p.reasons?.length > 0 && <div className="muted">{p.reasons.join('; ')}</div>}
+      {p.reasons?.length > 0 && <div className="muted">{reasonsText(p.reasons)}</div>}
     </div>
   )
 }

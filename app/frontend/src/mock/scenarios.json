@@ -1,0 +1,29 @@
+{
+  "demo": {
+    "label": "All states: K1/K3 signals, insufficient, unreviewed, provisional, row errors",
+    "settings": {
+      "target_minutes": 10,
+      "selected_priority": "P1",
+      "baseline_end": "2026-09-21T00:00:00-04:00",
+      "as_of": "2026-09-30T18:00:00-04:00"
+    }
+  },
+  "small": {
+    "label": "Interface example: 3 rows, 2 usable, 1 excluded",
+    "settings": {
+      "target_minutes": 10,
+      "selected_priority": "P1",
+      "baseline_end": "2026-09-21T00:00:00-04:00",
+      "as_of": "2026-09-22T08:00:00-04:00"
+    }
+  },
+  "empty": {
+    "label": "No usable records",
+    "settings": {
+      "target_minutes": 10,
+      "selected_priority": "P1",
+      "baseline_end": "2026-09-21T00:00:00-04:00",
+      "as_of": "2026-10-01T00:00:00-04:00"
+    }
+  }
+}
