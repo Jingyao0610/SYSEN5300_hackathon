@@ -635,9 +635,10 @@ when real analysis fails. H-04 remains in progress until all of its ledger accep
 ## 10. Frontend migration from the initial MOCK prototype
 
 The frontend added in commit `5064507` deliberately used a draft response shape. Its six request
-fields already match v1.0, but it cannot yet render a real core response. Pingchuan owns the
-following adaptations; Julian should implement v1.0 rather than create a second compatibility schema.
-This list is a source-code audit, not an executed browser acceptance test.
+fields already matched v1.0, but at that commit it could not render a real core response. The table
+records the adaptations assigned to Pingchuan; the progress note below covers the subsequent
+`4e0548b` update. Julian should implement v1.0 rather than create a second compatibility schema.
+Source review and fixture tests do not establish browser or HTTP acceptance.
 
 | Initial MOCK/UI assumption | Required v1.0 adaptation |
 |---|---|
@@ -656,6 +657,41 @@ This list is a source-code audit, not an executed browser acceptance test.
 Update the mock fixtures to the same schema so mocked development and real integration exercise
 the same rendering paths. Confirm the three-row example and K1/K3 through the actual API with
 mock mode disabled before reporting H-04 complete.
+
+### Verification of the frontend update in `4e0548b`
+
+Shifeng's independent source review found all eleven adaptations above in the new implementation.
+The frontend fixtures now come from the verified core, with `meta.is_mock` set to true for mock
+presentation. Historical `as_of` can be entered explicitly; when blank it is omitted for the API
+to resolve. Baseline confirmation reuses the returned observation cutoff.
+
+The updated frontend was copied to a temporary verification folder with the required H-03 fixture.
+Dependencies were installed there using pnpm after importing the committed npm lockfile; repository
+frontend files and the lockfile were not changed. Actual command output on 2026-10-16 was:
+
+```text
+vitest run
+Test Files  3 passed (3)
+     Tests  15 passed (15)
+
+vite build
+44 modules transformed.
+built in 5.19s
+```
+
+These are six CSV helper tests, six time helper tests and three schema/fixture tests, plus a
+production build. They do not call a live backend or prove browser rendering. Two concrete items
+remain for H-04 acceptance:
+
+- `src/csv.js` retains only the five required columns. Section 3 also requires imported extra
+  columns to survive export, so Pingchuan still needs to preserve those fields.
+- A header-only CSV supplies no priority to select. The normal UI therefore cannot issue the
+  zero-row `empty_input` request. Test the browser's no-data state and the API's empty request
+  separately, or provide an explicit UI test path. The current MOCK scenario named `empty`
+  contains two invalid P1 records; it tests `no_usable_imported_records`, a different case.
+
+No backend entry point or startup script was present in this repository snapshot, so real
+HTTP/browser integration remains pending. The API fixture procedure below is ready for that handoff.
 
 ## 11. Executable handoff cases and integration acceptance
 

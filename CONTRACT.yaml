@@ -104,7 +104,7 @@ tasks:
       same numbers through the core, API and UI; one data/ CSV agrees with the
       verified core. Invalid, insufficient, unreviewed and provisional cases
       remain explicit. Formal analysis has mock mode disabled.
-    result: "Frontend progress: three pages implemented with explicit MOCK fixtures (5064507); 12 CSV/time utility tests reported passing by the team. Response-schema alignment, real API integration, K1/K3 cross-layer parity and full H-04 acceptance remain pending."
+    result: "Frontend 4e0548b source review confirms the eleven v1.0 adaptations; isolated verification printed 15 passed (15) and production build succeeded in 5.19s. Extra-column CSV retention and empty-input UI handling remain documented; real API/browser parity and full H-04 acceptance are pending."
 
   - id: H-05
     title: Demonstration of the tool on every test dataset
