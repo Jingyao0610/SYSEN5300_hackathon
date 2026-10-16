@@ -29,7 +29,10 @@ export function parseRows(text) {
 
 /**
  * Parse an incident CSV into records. Throws if a required column is missing
- * (the API would answer 422). Extra columns are ignored; empty cells become ''.
+ * (the API would answer 422). The five required values are trimmed; extra
+ * columns are kept exactly as written (interfaces v1.0 section 3: the core
+ * ignores them, the browser keeps them for export). Empty cells become ''.
+ * A repeated header name keeps its first column.
  */
 export function parseIncidents(text) {
   const rows = parseRows(text.replace(/^﻿/, ''))
@@ -37,10 +40,24 @@ export function parseIncidents(text) {
   const header = rows[0].map((h) => h.trim())
   const missing = COLUMNS.filter((c) => !header.includes(c))
   if (missing.length) throw new Error(`Missing required column(s): ${missing.join(', ')}`)
-  const idx = COLUMNS.map((c) => header.indexOf(c))
+  const cols = header
+    .map((name, i) => ({ name, i }))
+    .filter(({ name, i }) => name !== '' && header.indexOf(name) === i)
+  const required = new Set(COLUMNS)
   return rows.slice(1).map((r) =>
-    Object.fromEntries(COLUMNS.map((c, j) => [c, (r[idx[j]] ?? '').trim()]))
+    Object.fromEntries(cols.map(({ name, i }) => {
+      const v = r[i] ?? ''
+      return [name, required.has(name) ? v.trim() : v]
+    }))
   )
+}
+
+/** Column names that are not among the five required ones, in first-seen order. */
+export function extraColumns(records) {
+  const required = new Set(COLUMNS)
+  const seen = new Set()
+  for (const r of records) for (const k of Object.keys(r)) if (!required.has(k)) seen.add(k)
+  return [...seen]
 }
 
 const quote = (v) => {
@@ -48,7 +65,8 @@ const quote = (v) => {
   return /[",\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s
 }
 
-/** Records back to CSV text with the five columns, in order. */
+/** Records back to CSV: the five columns first, then every extra column. */
 export function toCsv(records) {
-  return [COLUMNS.join(','), ...records.map((r) => COLUMNS.map((c) => quote(r[c])).join(','))].join('\n') + '\n'
+  const cols = [...COLUMNS, ...extraColumns(records)]
+  return [cols.map(quote).join(','), ...records.map((r) => cols.map((c) => quote(r[c])).join(','))].join('\n') + '\n'
 }

@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { COLUMNS, parseIncidents, toCsv } from '../csv.js'
+import { COLUMNS, extraColumns, parseIncidents, toCsv } from '../csv.js'
 import { reasonText, reasonsText } from '../status.js'
 import { nyLocalToIso, showNy } from '../time.js'
 
@@ -10,6 +10,7 @@ export default function DataSettings({ records, source, settings, res, busy, onR
   const [importError, setImportError] = useState('')
   const [form, setForm] = useState(null)
 
+  const extras = useMemo(() => extraColumns(records), [records])
   const priorities = useMemo(() => [...new Set(records.map((r) => r.priority).filter(Boolean))].sort(), [records])
   const excludedByRow = useMemo(
     () => new Map((res?.excluded_records ?? []).map((e) => [e.row_number, e.reasons])),
@@ -70,7 +71,10 @@ export default function DataSettings({ records, source, settings, res, busy, onR
             Add completed response
           </button>
           <button onClick={exportCsv} disabled={records.length === 0}>Export CSV</button>
-          <span className="muted">{records.length ? `${records.length} rows from ${source}` : 'No records loaded.'}</span>
+          <span className="muted">
+            {records.length ? `${records.length} rows from ${source}` : 'No records loaded.'}
+            {extras.length > 0 && ` · extra column(s) kept for export, not analysed: ${extras.join(', ')}`}
+          </span>
         </div>
         {importError && <p className="error" role="alert">{importError}</p>}
 
