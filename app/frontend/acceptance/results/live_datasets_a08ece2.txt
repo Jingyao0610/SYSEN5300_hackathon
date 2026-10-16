@@ -1,5 +1,5 @@
 Browser acceptance, all data/ CSVs, real UI + API, mock disabled
-Commit tested: live site, built from a08ece2; started with bash app/testme.sh
+Commit tested: live site on Posit Connect, built from a08ece2; no local servers running
 
 PASS  jingyao-stable-P1        import: page shows 12000 rows
 PASS  jingyao-stable-P1        analysis, nothing reviewed: HTTP 200, identical to core

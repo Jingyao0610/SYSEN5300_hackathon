@@ -1,5 +1,5 @@
 Browser acceptance, nine handoff cases + extra columns, real UI + API, mock disabled
-Commit tested: live site, built from a08ece2; started with bash app/testme.sh
+Commit tested: live site on Posit Connect, built from a08ece2; no local servers running
 
 PASS  k1_high        HTTP 200, response identical to core expected
 PASS  k1_high        reviewed_zones sent as in request

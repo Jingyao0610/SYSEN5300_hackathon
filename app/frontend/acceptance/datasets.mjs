@@ -145,7 +145,7 @@ await b.close()
 
 const notes = plan.filter((r) => r.listed_but_not_confirmable.length)
   .map((r) => `Note: ${r.name} codebook lists ${r.listed_but_not_confirmable} as reviewed, but their baselines are not usable, so the page cannot confirm them (interfaces section 10); verdicts are unaffected.`)
-const out = [`Browser acceptance, all data/ CSVs, real UI + API, mock disabled`, `Commit tested: ${COMMIT}; started with bash app/testme.sh`, '',
+const out = [`Browser acceptance, all data/ CSVs, real UI + API, mock disabled`, `Commit tested: ${COMMIT}; ${process.env.FRONTEND_URL ? 'page under test given by FRONTEND_URL' : 'local, started with bash app/testme.sh'}`, '',
   ...lines, '', `${lines.length - fails}/${lines.length} checks passed`, ...notes].join('\n') + '\n'
 writeFileSync(`${OUT}/RESULTS.txt`, out)
 console.log(out)

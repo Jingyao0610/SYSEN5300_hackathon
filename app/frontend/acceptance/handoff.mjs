@@ -101,7 +101,7 @@ for (const c of manifest.cases.filter(c => c.name !== 'empty')) {
 }
 await b.close()
 const fmt = rows.map(r => `${r.ok ? 'PASS' : 'FAIL'}  ${r.c.padEnd(14)} ${r.check}${r.ok || !r.detail ? '' : `  [${r.detail}]`}`)
-const out = [`Browser acceptance, nine handoff cases + extra columns, real UI + API, mock disabled`, `Commit tested: ${COMMIT}; started with bash app/testme.sh`, '',
+const out = [`Browser acceptance, nine handoff cases + extra columns, real UI + API, mock disabled`, `Commit tested: ${COMMIT}; ${process.env.FRONTEND_URL ? 'page under test given by FRONTEND_URL' : 'local, started with bash app/testme.sh'}`, '',
   ...fmt, '', `${rows.filter(r => r.ok).length}/${rows.length} checks passed`].join('\n') + '\n'
 writeFileSync(`${OUT}/RESULTS.txt`, out); console.log(out)
 process.exit(allPass ? 0 : 1)
