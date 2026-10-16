@@ -6,7 +6,8 @@ This document makes the [SPEC](../SPEC.md), [implementation plan](plan.md), and
 passed 112 tests plus an [independent statistical review](../tests/fixtures/qc/REVIEW.md).
 Julian owns the backend integration; Pingchuan owns the frontend adaptation. The frontend's earlier
 MOCK payload is a prototype, not an alternative API schema. Julian's backend fork has passed
-independent HTTP verification (section 9); integration with the current frontend remains H-04 work.
+independent HTTP verification (section 9) and is now merged. Pingchuan's real-browser acceptance
+report is recorded in section 10; a formal H-02 dataset parity check remains open under H-04.
 The separate H-01 team method walkthrough is not claimed complete by this interface release.
 
 The method is a daily p chart of late completed responses, separately for each zone within one
@@ -580,7 +581,7 @@ so the baseline cutoff is valid. Record timestamps must already be at or before 
 
 The H-03 core checks have passed; see the [numerical review](../tests/fixtures/qc/REVIEW.md).
 The API and browser checks below define H-04 acceptance; section 9 records the isolated backend
-checks now completed, while real browser acceptance remains pending. H-03 owns core fixtures/tests;
+checks now completed, and section 10 records the teammate's browser acceptance report. H-03 owns core fixtures/tests;
 H-04 owns API fixtures/tests and browser checks. Keep their file ownership separate.
 
 | Case | Required check |
@@ -611,8 +612,8 @@ The team method walkthrough remains a separate H-01 acceptance step.
 ## 9. Backend handoff to Julian
 
 H-04 is assigned to Julian Jiang, with Pingchuan exclusively responsible for `app/frontend/`.
-Backend verification is now complete for the fork commit identified below; integration with the
-team's current frontend and end-to-end acceptance are still pending.
+Backend verification is complete for the commit identified below, now merged into main. The
+frontend acceptance report is in section 10; H-04 still needs formal H-02 dataset parity and final check-in.
 
 1. Pull the shared branch before starting. Preserve the existing `app/qc.py` and `app/frontend/`
    when copying the FastAPI starter; initialize only the missing backend files and four scripts.
@@ -663,12 +664,12 @@ nine HTTP checks used a real temporary Uvicorn server and the exact section 11 r
 every complete success response equaled its verified expected JSON, including K1/K3 boundaries,
 insufficient/unreviewed/current-day states and empty input. The server was stopped after the checks.
 
-Julian separately reported that both services start via the script. That combined-startup claim
-was not repeated in this independent backend review, and real page rendering has not been accepted.
-His fork has an older frontend snapshot: bring the eight-file backend change onto the current team
-branch, preserving the frontend adaptation already landed in `4e0548b`. Do not replace the team
-checkout with the fork's whole tree. No backend merge, PR creation or deployment was performed by
-this review; H-04 remains `in_progress` until its remaining acceptance checks pass.
+The isolated review above did not repeat combined startup or browser rendering. Subsequently,
+PR #1 merged the backend at `d97345a`, preserving the newer frontend, and Pingchuan supplied the
+combined-startup/browser report in section 10. Main `5343c8a` contains the same backend, core and
+Python test files as the independently verified fork. A fresh `pytest tests` on that merged
+checkout printed `175 passed, 1 warning in 2.46s`. No deployment is claimed; H-04 remains
+`in_progress` until its remaining acceptance checks pass.
 
 For Windows Git Bash, a locally created virtual environment is activated with
 `source .venv/Scripts/activate`; if `python3` is unavailable, use
@@ -722,20 +723,45 @@ vite build
 built in 5.19s
 ```
 
-These are six CSV helper tests, six time helper tests and three schema/fixture tests, plus a
-production build. They do not call a live backend or prove browser rendering. Two concrete items
-remain for H-04 acceptance:
+Those initial checks comprised six CSV helper tests, six time helper tests and three schema/fixture
+tests, plus a production build. The subsequent CSV fix and browser report follow.
 
-- `src/csv.js` retains only the five required columns. Section 3 also requires imported extra
-  columns to survive export, so Pingchuan still needs to preserve those fields.
-- A header-only CSV supplies no priority to select. The normal UI therefore cannot issue the
-  zero-row `empty_input` request. Test the browser's no-data state and the API's empty request
-  separately, or provide an explicit UI test path. The current MOCK scenario named `empty`
-  contains two invalid P1 records; it tests `no_usable_imported_records`, a different case.
+### CSV fix and browser acceptance report accompanying `5343c8a`
 
-The shared main branch still has no backend entry point or startup script. The fork implementation
-has now passed the independent HTTP checks in section 9; bringing it together with this frontend
-and verifying real browser behavior remain pending.
+The extra-column retention gap is fixed in `5343c8a`: imported extra values are retained, passed
+through to the API and exported after the required columns. Source review confirms the change.
+Independent verification of the updated frontend in the isolated copy printed:
+
+```text
+Test Files  3 passed (3)
+     Tests  17 passed (17)
+vite build: 44 modules transformed; built in 4.33s
+```
+
+Pingchuan reported **70/70 checks PASS** in a real-browser campaign with mock disabled, started
+using `bash app/testme.sh`. His stated test tree was main `7ca170e` plus Julian's `1a89adf` backend
+and his updated frontend. The corresponding backend and CSV-retention changes are now on main.
+This is a teammate report, also described in the CSV-fix commit message; Shifeng has not independently
+replayed those 70 browser checks or received a full per-check browser trace.
+
+- The eight nonempty export cases returned final `/analyze` responses deep-equal to their expected
+  JSON. The page showed matching counts, rates, limits, statuses, signals, coverage, timezone,
+  target and observation cutoff.
+- K1 limits displayed 1.0% / 19.0%; K3 displayed 5.5% / 14.5%. Both upper-boundary cases displayed
+  No signal with zero formal signals. Unreviewed, current-day and insufficient cases retained
+  their distinct statuses with no signals.
+- The small case displayed 2 usable and 1 excluded out of 3, including its exclusion reason.
+- The ninth case, `empty`, was blocked by the UI because there were no rows or selectable priority.
+  A direct HTTP POST returned 200 with the expected response. This follows the section 11 empty
+  input exception; it is not a ninth browser-submitted request.
+- Extra-column import/API/export retention was also reported checked in the browser.
+
+The backend merge is complete, so it is no longer an open action. The remaining named dependency
+is comparison of at least one **formal H-02 `data/` CSV** with the verified core, using the codebook's
+exact settings. H-03 export cases do not replace that dataset. Before final H-04 check-in, retain
+the merged commit and acceptance output and confirm the section 8 interaction checks (including
+manual entry, settings changes/stale results and error handling); the short 70-check report does
+not enumerate every one of those interactions. No new empty-submission UI feature is required.
 
 ## 11. Executable handoff cases and integration acceptance
 
@@ -864,12 +890,12 @@ no priority to select, and the browser may prevent submission of an empty record
 empty request through HTTP separately and verify the browser's no-data state. If an empty POST
 must be exercised through the UI, H-04 needs an explicit test entry point; do not assume it exists.
 
-| Acceptance evidence | Current state | Record after execution |
+| Acceptance evidence | Current state | Evidence / remaining work |
 |---|---|---|
 | Nine exported core cases and CSV round trips | PASS; verified locally | 15,252 data rows; 28 exported files |
 | Core definition of done | PASS; independently reviewed | `112 passed in 0.74s` |
-| Nine actual HTTP responses | PASS on isolated backend fork `1a89adf`; not yet integrated into main | Shifeng + Codex, 2026-10-16; all complete responses match; see section 9 |
-| Browser cases with mock disabled | Pending | Frontend/backend commits, operator, visible values and evidence |
+| Nine actual HTTP responses | Independently PASS on `1a89adf`, now merged at `d97345a` | All complete responses match; merged checkout Python suite also passes; see section 9 |
+| Browser campaign with mock disabled | Pingchuan reports 70/70 PASS | Eight nonempty UI cases; empty is UI-blocked plus HTTP-verified; extra-column round trip included; see section 10 |
 | H-02 demonstration dataset parity | Pending dataset/integration | Dataset, exact settings, matching numbers |
 | H-01 human method walkthrough | Pending | Participants, date, unresolved explanations |
 

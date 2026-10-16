@@ -44,7 +44,7 @@ tasks:
       grep -c "FILL IN[.,]" SPEC.md prints 0 (it counts only the blanks,
       not the instructions at the top), and every teammate can say the
       method sentence in SPEC section 4 without reading it.
-    result: "SPEC blanks 0; interfaces v1.0 includes integration steps and English method walkthrough. Documentation checks pass; Julian's backend fork now independently verified against v1.0. Human method acceptance and real frontend integration remain pending."
+    result: "SPEC blanks 0; interfaces v1.0 includes integration evidence and English method walkthrough. Backend is merged; Pingchuan's browser acceptance report is recorded. Human method walkthrough remains pending."
 
   - id: H-02
     title: Two or three test datasets plus a codebook
@@ -97,9 +97,12 @@ tasks:
       when backend, frontend and the end-to-end checks pass; there are no H-04a/b IDs.
       Julian reported backend completion on fork branch codex/h04-backend,
       commit 1a89adf6ddf679ccdaa759497b6bda8aa51281dc, on 2026-10-16. Shifeng
-      independently verified that exact commit in an isolated copy; it is not
-      merged into the team main branch. Frontend v1.0 adaptation already landed
-      in 4e0548b; preserve that newer frontend when integrating the backend.
+      independently verified that exact commit in an isolated copy. PR 1 merged
+      it into main at d97345a. Frontend v1.0 adaptation landed in 4e0548b and
+      extra-column retention in 5343c8a. Pingchuan reported 70/70 real-browser
+      campaign checks passing, using bash app/testme.sh with mock disabled;
+      empty input was UI-blocked and checked separately through HTTP, not
+      submitted from the browser. H-02 dataset parity remains open.
       The verification evidence and remaining acceptance work are in
       docs/interfaces.md sections 9-11. No deployment is claimed.
     definition_of_done: >
@@ -108,7 +111,7 @@ tasks:
       same numbers through the core, API and UI; one data/ CSV agrees with the
       verified core. Invalid, insufficient, unreviewed and provisional cases
       remain explicit. Formal analysis has mock mode disabled.
-    result: "Backend 1a89adf independently verified: 175 passed, 1 warning in 2.42s; nine real HTTP responses exactly match the core and 422 envelope passes. Frontend 4e0548b already passes 15 tests/build. Backend remains in fork; integration, live UI K1/K3, CSV retention and remaining H-04 acceptance are pending."
+    result: "Main 5343c8a independently checked: pytest tests printed 175 passed, 1 warning in 2.46s; frontend 17 passed (17), build 4.33s. Pingchuan reports 70/70 UI/HTTP checks PASS with mock disabled; CSV retention fixed and backend merged. Formal H-02 CSV parity and final acceptance record remain pending."
 
   - id: H-05
     title: Demonstration of the tool on every test dataset
