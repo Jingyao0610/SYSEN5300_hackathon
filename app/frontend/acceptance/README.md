@@ -13,7 +13,20 @@ every `/analyze` response the browser receives with the core's own result.
 | [`datasets.mjs`](datasets.mjs) | All 7 `data/` CSVs with each codebook's settings, plus P2 for the four regular synthetic files: 11 runs | **110/110** — [results](results/datasets_e189c4b.txt) |
 | [`handoff.mjs`](handoff.mjs) | Shifeng's 9 core handoff cases (K1/K3 high and boundary, insufficient, unreviewed, current day, 3/2/1, empty) plus an extra-CSV-column round trip | **70/70** — [results](results/handoff_e189c4b.txt) |
 
-### Live site (Posit Connect)
+### Live site after the dashboard redesign (`9d5ca9e`)
+
+The redesigned dashboard (light and dark themes) was redeployed and retested live, with no local servers:
+- `datasets.mjs`: **110/110** ([results](results/live_datasets_9d5ca9e.txt));
+- `handoff.mjs`: **70/70** ([results](results/live_handoff_9d5ca9e.txt)).
+
+The scripts were updated for the new layout:
+- the zone is selected with `select[name=zone]`;
+- signals are counted from the "Days to review" feed;
+- the chart shows monitoring days by default.
+
+They also block browser downloads.
+
+### Live site (Posit Connect), first deployment
 
 The deployed page and API, built from `a08ece2`, were tested with nothing running locally, so every request went from the live page to the live API. Both suites pass with the same expected results:
 - `datasets.mjs`: **110/110** ([results](results/live_datasets_a08ece2.txt));
