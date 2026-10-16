@@ -1,0 +1,30 @@
+{
+  "records": [
+    {
+      "incident_id": "E001",
+      "zone": "A",
+      "priority": "P1",
+      "dispatched_at": "2026-09-20T10:00:00-04:00",
+      "on_scene_at": "2026-09-20T10:08:00-04:00"
+    },
+    {
+      "incident_id": "E002",
+      "zone": "A",
+      "priority": "P1",
+      "dispatched_at": "2026-09-21T10:00:00-04:00",
+      "on_scene_at": "2026-09-21T10:12:00-04:00"
+    },
+    {
+      "incident_id": "E003",
+      "zone": "A",
+      "priority": "P1",
+      "dispatched_at": "2026-09-21T11:00:00-04:00",
+      "on_scene_at": null
+    }
+  ],
+  "target_minutes": 10,
+  "selected_priority": "P1",
+  "baseline_end": "2026-09-21T00:00:00-04:00",
+  "reviewed_zones": [],
+  "as_of": "2026-09-22T08:00:00-04:00"
+}

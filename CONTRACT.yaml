@@ -29,20 +29,22 @@ tasks:
     title: Fill in every FILL IN line in SPEC.md
     points: "15 - Tool Design: scope matches a prompt (5), clear user and use case (5), minimal inputs (5)"
     status: in_progress
-    owner: "Codex + Chinese Can Fly"
+    owner: "Chinese Can Fly (team walkthrough)"
     started_at: "2026-10-16 15:22 -04:00"
     owns: ["SPEC.md", "docs/plan.md", "docs/team.md", "docs/team.en.md", "docs/interfaces.md"]
     notes: >
       Do this together, out loud, right after kickoff. The prompts are in
       docs/prompts.md once the event starts. Keep inputs to what the user can
       actually measure. Shifeng coordinates the team walkthrough and interface
-      agreement with Julian and Pingchuan before H-03 is claimed. Planning
+      agreement with Julian and Pingchuan. The user explicitly directed H-03
+      implementation to start on 2026-10-16 while the team walkthrough remains
+      pending; do not report that human acceptance as complete. Planning
       ownership includes the user-requested team and interface documents.
     definition_of_done: >
       grep -c "FILL IN[.,]" SPEC.md prints 0 (it counts only the blanks,
       not the instructions at the top), and every teammate can say the
       method sentence in SPEC section 4 without reading it.
-    result: "SPEC filled for Chinese Can Fly; blank check printed 0, YAML parsed and numeric examples verified. Team method walkthrough remains before check-in."
+    result: "SPEC filled and interfaces v1.0 released for H-04; blanks 0, JSON examples parse and verified core matches the schema. Team method walkthrough remains pending."
 
   - id: H-02
     title: Two or three test datasets plus a codebook
@@ -60,9 +62,9 @@ tasks:
   - id: H-03
     title: Core QC statistic as one plain, tested function
     points: "25 - Tool Implementation: valid analyses relevant to quality control in R or Python"
-    status: todo
-    owner: "Shifeng Hong"
-    started_at: ""
+    status: done
+    owner: "Shifeng Hong + Codex"
+    started_at: "2026-10-16 16:17 -04:00"
     owns: ["app/qc.py", "tests/test_qc.py", "tests/fixtures/qc/"]
     notes: >
       Load the stats-first-steering skill before writing any statistics. Plain
@@ -74,14 +76,14 @@ tasks:
       pytest tests/test_qc.py passes, covering K0-K4 and D1-D3 in docs/plan.md,
       including the SPEC section 4 known answer, frozen baseline and degenerate
       cases; independent statistical review records a PASS/FAIL table with numbers.
-    result: ""
+    result: "Core and deterministic fixtures verified: pytest tests/test_qc.py printed 112 passed in 0.78s; independent review OVERALL PASS with numerical table in tests/fixtures/qc/REVIEW.md. Released with interfaces v1.0 for H-04 integration."
 
   - id: H-04
     title: Working tool - one demo copied to app/ and wired to the H-03 function
     points: "25 - Tool Implementation: an effective, working tool (does it run?)"
-    status: todo
+    status: in_progress
     owner: "Julian Jiang"
-    started_at: ""
+    started_at: "2026-10-16 16:30 -04:00"
     owns: ["app/", "tests/test_api.py", "tests/fixtures/api/"]
     notes: >
       Load fastapi-react-scaffold. Julian initializes the FastAPI starter once
@@ -93,6 +95,9 @@ tasks:
       preparation may run alongside H-03; no silent mock fallback is allowed.
       Integrate real analysis only after H-03 verification. H-04 is complete only
       when backend, frontend and the end-to-end checks pass; there are no H-04a/b IDs.
+      Backend environment readiness was reported by Julian through Shifeng on
+      2026-10-16. The finalized v1.0 interface and verified H-03 core are ready;
+      the existing frontend MOCK schema must be adapted before real integration.
     definition_of_done: >
       pytest tests passes. From the repo root, bash app/testme.sh starts the
       complete tool with one command. K1 and K3 deterministic inputs return the
