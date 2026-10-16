@@ -5,11 +5,11 @@
 *Tackle real-world quality control problems drawn from industrial engineering,
 healthcare systems, and energy systems!*
 
-Your team picks a prompt, invents the data, and ships a working quality-control
+---
+
+Your team picks a prompt, creates the data, and ships a working quality-control
 tool. **👉 [Register on Devpost](https://six-sigma-hackathon.devpost.com/)**
 (required, even if you don't have a team yet).
-
----
 
 ### 📍 When & where
 
@@ -26,41 +26,6 @@ link plus a demo. Full run of show: [🗓️ Schedule](docs/schedule.md).
 
 ---
 
-### 🚀 Start here in 3 steps
-
-**0. No paid AI plan?** → [Use a free AI agent tonight](docs/opencode.md) (OpenCode + a free Google AI Studio key, $0).
-
-**1. Pick your stack.** Copy one template folder into your own repo.
-
-| You want to build… | Start from |
-|---|---|
-| a Python API | [`demos/fastapi/`](demos/fastapi/) |
-| an R API | [`demos/plumber/`](demos/plumber/) |
-| a web front end | [`demos/reactfront/`](demos/reactfront/) |
-| a dashboard | [`demos/shinyapp/`](demos/shinyapp/) |
-| a reusable library | [`demos/pypackage/`](demos/pypackage/) or [`demos/rpackage/`](demos/rpackage/) |
-
-**2. Describe your app and ask your agent to update the SPEC.**
-[`SPEC.md`](SPEC.md) (what you are building and for whom) and
-[`CONTRACT.yaml`](CONTRACT.yaml) (the task list your team and your agents check
-tasks in and out of) are already here and already started for you. You do not
-need to read or edit `SPEC.md` by hand. Describe your app in a few sentences (who
-uses it, what data they have, what statistic answers their question, what they
-should see) and ask your agent: *"Update SPEC.md's FILL IN lines from this
-description and show me the diff."* Read the diff together. Your agent reads
-both files first, so do this before it writes code (the ready-made prompt is
-"Write our SPEC" in [`docs/prompts-starter.md`](docs/prompts-starter.md)). Blank copies live in
-[`.claude/templates/`](.claude/templates/README.md).
-
-**3. Deploy with one workflow.** Copy the matching workflow from
-[`.claude/skills/connect-publish/workflows/`](.claude/skills/connect-publish/workflows/)
-into your repo's `.github/workflows/` and it publishes your tool to the course
-**Posit Connect** server. Which file fits your app, and which script goes with
-it: [`.claude/skills/connect-publish/README.md`](.claude/skills/connect-publish/README.md).
-Publisher credentials are handed out at the event.
-
----
-
 ### Quick Links
 
 - [🗓️ Schedule of Events](docs/schedule.md)
@@ -68,10 +33,16 @@ Publisher credentials are handed out at the event.
 - [🔢 Evaluation Criteria](docs/criteria.md)
 - [📚 Resources for Building Your Tool](docs/resources.md)
 - [🧰 Starter Templates](demos/README.md)
-- [🤖 Agent context bundle](CLAUDE.md) — read this before you start building
+- [🤖 Agent Start Tutorial](docs/start.md) — type `/superagent` and your agent reads it for you
 - [⁉️ FAQ](#️-frequently-asked-questions)
 
 ---
+
+> ### 📘🤖 New here? Read the [step-by-step start tutorial](docs/start.md) first
+> Ten minutes, for the whole team: set up your agent, **plan with `/superagent` on your
+> strongest model**, then **switch to a cheaper model** that builds and checks each task with
+> helper agents. **[→ docs/start.md](docs/start.md)**
+
 
 ### 💡 The Challenge
 
@@ -100,10 +71,10 @@ statistically correct work — which is exactly the skill this course is about.
 - [🎙️ Tools](docs/tools.md) — Wispr Flow (talk to your agent) and Open Design
 - [`CLAUDE.md`](CLAUDE.md) / [`AGENTS.md`](AGENTS.md) — what the event is, the
   repo map, the deploy target, the four-script contract
-- [`.claude/skills/`](.claude/skills/) — `connect-publish`,
-  `fastapi-react-scaffold`, `plumber-react-scaffold`, `contract-ledger`,
-  `od-setup`, `od-pull`, and
-  [`stats-first-steering`](.claude/skills/stats-first-steering/SKILL.md)
+- [`.claude/skills/superagent/`](.claude/skills/superagent/SKILL.md) — the one
+  skill you need: type `/superagent` and it routes to every other skill and
+  template for you. They all live in [`.claude/skills/`](.claude/skills/) if you
+  want to read them
 
 Two rules: everything you ship is **public and reproducible**, and you must be
 able to **explain every number your tool prints**.
