@@ -13,6 +13,19 @@ every `/analyze` response the browser receives with the core's own result.
 | [`datasets.mjs`](datasets.mjs) | All 7 `data/` CSVs with each codebook's settings, plus P2 for the four regular synthetic files: 11 runs | **110/110** — [results](results/datasets_e189c4b.txt) |
 | [`handoff.mjs`](handoff.mjs) | Shifeng's 9 core handoff cases (K1/K3 high and boundary, insufficient, unreviewed, current day, 3/2/1, empty) plus an extra-CSV-column round trip | **70/70** — [results](results/handoff_e189c4b.txt) |
 
+### Live site (Posit Connect)
+
+The deployed page and API, built from `a08ece2`, were tested with nothing running locally, so every request went from the live page to the live API. Both suites pass with the same expected results:
+- `datasets.mjs`: **110/110** ([results](results/live_datasets_a08ece2.txt));
+- `handoff.mjs`: **70/70** ([results](results/live_handoff_a08ece2.txt)).
+
+Also confirmed:
+- the live page answers HTTP 200 without logging in;
+- the live bundle contains no mock code and calls the deployed API, not `127.0.0.1`;
+- the live API's `/health` reports `"analysis_mode":"real"`.
+
+The deployment URLs are not written here; use `FRONTEND_URL` and `API_URL` to rerun.
+
 Per dataset run, `datasets.mjs` checks:
 - **import:** the row count shown on the page;
 - **analysis:** the responses before and after confirming baselines are identical to the core's;
