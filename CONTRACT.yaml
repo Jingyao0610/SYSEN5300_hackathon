@@ -49,7 +49,7 @@ tasks:
   - id: H-02
     title: Two or three test datasets plus a codebook
     points: "10 - Tool Documentation: 2-3 working test datasets (5), codebook and README for the data (5)"
-    status: in_progress
+    status: done
     owner: "Jingyao; Shifeng Hong supplemental dataset contribution"
     started_at: "2026-10-16 17:41 -04:00"
     owns: ["data/"]
@@ -59,12 +59,18 @@ tasks:
       Jingyao's candidate datasets or Hayden's real-data extract. Shifeng also
       authorized publishing Jingyao's supplied archive separately under
       data/jingyao_synthetic/. data/README.md indexes all three collections.
-      Canonical dataset selection and H-02 acceptance remain pending.
+      Shifeng authorized final H-02 acceptance and synchronization on
+      2026-10-16. Use Jingyao's three CSVs as the primary H-02 demonstration
+      bundle; Shifeng's synthetic bundle and Hayden's real extract remain
+      separate supplements. Acceptance is documented in data/H02_ACCEPTANCE.md.
     definition_of_done: >
-      ls data/*.csv lists 2 or 3 files (e.g. in control, planted shift, edge
-      case), and data/README.md names every one of them and describes every
-      column with units and how the data would be collected for real.
-    result: "Supplemental Shifeng bundle: 3 synthetic CSVs (12000/12000/2934 rows), codebook, generator and validation evidence; initial core checks and 6/6 local HTTP parity passed. Jingyao archive added separately (12000/12000/5118 rows), matching reviewed source bytes, with relocated reproduction and 5/5 core/API comparisons passed; all three collections indexed. Publication does not mark canonical H-02 acceptance done."
+      ls data/jingyao_synthetic/*.csv lists exactly stable.csv, zone_shift.csv
+      and edge_cases.csv. python data/jingyao_synthetic/verify.py passes.
+      data/README.md identifies this primary bundle, names every dataset and
+      links the codebook describing every column, units, fixed settings,
+      synthetic provenance and how the data would be collected for real.
+      data/H02_ACCEPTANCE.md records the actual checks and evidence.
+    result: "H-02 accepted: Jingyao primary bundle has exactly 3 CSVs (12000/12000/5118 rows) and a complete codebook. Fresh verify.py exited 0: byte-for-byte seed-5300 reproduction, 5/5 core/API comparisons and edge checks PASS. Existing H-04 browser evidence covers all 7 CSVs; originals unchanged. Shifeng synthetic and NYC real data remain separate supplements. See data/H02_ACCEPTANCE.md."
 
   - id: H-03
     title: Core QC statistic as one plain, tested function

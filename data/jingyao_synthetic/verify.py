@@ -62,7 +62,7 @@ def verify():
                     assert points['BOUNDARY','2026-09-21']['n']==3
                     assert sum(r['incident_id']=='SYN-duplicate' for r in actual['excluded_records'])==2
                     print('PASS: D1/D2/D3; target equality; +1 second; cutoff; midnight; duplicates; provisional 20/100')
-    print('PASS: H-02 checks complete. Independent playback and browser dataset acceptance remain pending.')
+    print('PASS: H-02 reproduction, core/API and edge checks complete. Browser acceptance is recorded separately in data/H02_ACCEPTANCE.md.')
 
 if __name__=='__main__':
     if len(sys.argv)>1 and sys.argv[1]=='--request':
