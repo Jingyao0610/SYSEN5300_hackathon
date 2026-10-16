@@ -76,7 +76,7 @@ tasks:
       pytest tests/test_qc.py passes, covering K0-K4 and D1-D3 in docs/plan.md,
       including the SPEC section 4 known answer, frozen baseline and degenerate
       cases; independent statistical review records a PASS/FAIL table with numbers.
-    result: "Core and deterministic fixtures verified: pytest tests/test_qc.py printed 112 passed in 0.78s; independent review OVERALL PASS with numerical table in tests/fixtures/qc/REVIEW.md. Released with interfaces v1.0 for H-04 integration."
+    result: "Core independently reviewed PASS; latest pytest tests/test_qc.py printed 112 passed in 0.74s. Nine synthetic handoff cases export to JSON/CSV; 9 round trips, 15252 CSV rows and overwrite refusal verified. Core and test hashes unchanged; HTTP/UI verification remains H-04."
 
   - id: H-04
     title: Working tool - one demo copied to app/ and wired to the H-03 function
