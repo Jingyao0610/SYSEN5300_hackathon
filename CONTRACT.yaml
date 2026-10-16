@@ -88,7 +88,7 @@ tasks:
   - id: H-04
     title: Working tool - one demo copied to app/ and wired to the H-03 function
     points: "25 - Tool Implementation: an effective, working tool (does it run?)"
-    status: in_progress
+    status: done
     owner: "Julian Jiang"
     started_at: "2026-10-16 16:30 -04:00"
     owns: ["app/", "tests/test_api.py", "tests/fixtures/api/"]
@@ -118,7 +118,7 @@ tasks:
       same numbers through the core, API and UI; one data/ CSV agrees with the
       verified core. Invalid, insufficient, unreviewed and provisional cases
       remain explicit. Formal analysis has mock mode disabled.
-    result: "Main 5343c8a independently checked: pytest tests printed 175 passed, 1 warning in 2.46s; frontend 17 passed (17), build 4.33s. Pingchuan reports 70/70 UI/HTTP checks PASS with mock disabled; CSV retention fixed and backend merged. Formal H-02 CSV parity and final acceptance record remain pending."
+    result: "H-04 accepted: pytest 175 passed (1 warning); frontend 17 passed; original testme.sh starts real API and UI. Julian PR 2 and local recheck passed 37 HTTP calls across 7 CSVs. Pingchuan browser evidence at 3db4409 passed 110/110 dataset and 70/70 handoff checks; independently reviewed, source/data unchanged since e189c4b. See tests/fixtures/api/H04_CHECKIN.md. Deployment remains H-06."
 
   - id: H-05
     title: Demonstration of the tool on every test dataset
