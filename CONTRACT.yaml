@@ -212,7 +212,7 @@ tasks:
   - id: H-09
     title: Optional live synthetic stream and accelerated monitoring
     points: "Extension - no additional rubric points"
-    status: in_progress
+    status: done
     owner: "Shifeng Hong + Codex"
     started_at: "2026-10-16 19:44 -04:00"
     owns: ["SPEC.md", "app/frontend/src/", "app/frontend/acceptance/simulation_core_check.mjs", "docs/live-simulation.md", ".github/workflows/deploy-react-static.yml"]
@@ -236,4 +236,4 @@ tasks:
       stale file reads; changing a target during loading cannot restore an
       analysis for the old target. Example loading still works normally.
       The existing deployed website shows the new feature and real API results.
-    result: "Simulation deployed at 8815a1b via run 38985494228 and verified live. Follow-up request-ordering fixes pass 54 frontend tests (17 race regressions), 175 backend tests and 10 stream parity cases; local browser parameter-edit, example and CSV-import checks pass. Follow-up deployment verification pending."
+    result: "H-09 accepted: 54 frontend tests (17 request-ordering regressions), 175 backend tests (1 existing warning), production build and 10 generated-stream core/API cases pass. Commit 7271257 deployed successfully via run 38986176187. Live browser verified obsolete example/analysis cancellation, correct target-20 result, independent simulation at step 4 with 4200 rows and A 36/100 high. Local pause/reset/export/error recovery and run-cap checks recorded in docs/live-simulation.md."
