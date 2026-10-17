@@ -2,14 +2,16 @@ import { useMemo, useRef, useState } from 'react'
 import { COLUMNS, extraColumns, parseIncidents, toCsv } from '../csv.js'
 import { pct, reasonText, reasonsText } from '../status.js'
 import { nyLocalToIso, showNy } from '../time.js'
+import { EXAMPLES } from '../examples.js'
 
 const PREVIEW_ROWS = 100
 const EMPTY_FORM = { incident_id: '', zone: '', priority: '', dispatched_at: '', on_scene_at: '' }
 
-export default function DataSettings({ records, source, settings, res, busy, onRecords, onSettings, onRun, onShowChart }) {
+export default function DataSettings({ records, source, settings, res, busy, onRecords, onSettings, onRun, onShowChart, onLoadExample }) {
   const [importError, setImportError] = useState('')
   const [form, setForm] = useState(null)
   const [over, setOver] = useState(false)
+  const [example, setExample] = useState('zone_shift')
   const fileRef = useRef(null)
 
   const extras = useMemo(() => extraColumns(records), [records])
@@ -90,6 +92,19 @@ export default function DataSettings({ records, source, settings, res, busy, onR
       <section className="panel">
         <div className="panel-head"><span className="pn">1</span><h2>Records</h2>
           <span className="aside">kept in this browser tab only</span></div>
+
+        <div className="row">
+          <label className="inline">
+            Try an example
+            <select value={example} onChange={(e) => setExample(e.target.value)} aria-label="Example dataset">
+              {Object.entries(EXAMPLES).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
+            </select>
+          </label>
+          <button className="primary" disabled={busy} onClick={() => onLoadExample(example)}>
+            {busy ? 'Loading…' : 'Load & analyse example'}
+          </button>
+          <span className="muted">or use your own file below</span>
+        </div>
 
         <div
           className={over ? 'drop over' : 'drop'}

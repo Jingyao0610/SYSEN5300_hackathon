@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { API_URL, MOCK, analyze, health, mockScenarios } from './api.js'
 import { parseIncidents } from './csv.js'
+import { EXAMPLES, SHOWCASE } from './examples.js'
 import { pct } from './status.js'
 import { TZ, nyLocalToIso, nyMidnightIso, showNy } from './time.js'
 import DataSettings from './views/DataSettings.jsx'
@@ -27,6 +28,7 @@ export default function App() {
   const [api, setApi] = useState({ state: 'checking' })
   const [mock, setMock] = useState(null) // { scenarios, csv, picked }
   const errorRef = useRef(null)
+  const autoLoaded = useRef(false)
   const [theme, setTheme] = useState(() => {
     try { return localStorage.getItem('theme') || 'auto' } catch { return 'auto' }
   })
@@ -71,7 +73,9 @@ export default function App() {
     })
   }
 
-  function buildRequest(reviewedZones, asOf) {
+  // ctx lets a freshly loaded example run before React state has updated
+  function buildRequest(reviewedZones, asOf, ctx = { records, settings }) {
+    const { records, settings } = ctx
     const problems = []
     const target = Number(settings.target_minutes)
     if (!settings.selected_priority) problems.push('Choose a priority.')
@@ -90,10 +94,10 @@ export default function App() {
     return req
   }
 
-  async function run(reviewedZones = [], asOf) {
+  async function run(reviewedZones = [], asOf, ctx) {
     let req
     try {
-      req = buildRequest(reviewedZones, asOf)
+      req = buildRequest(reviewedZones, asOf, ctx)
     } catch (e) {
       setErrors(Array.isArray(e) ? e : [e.message])
       return
@@ -113,6 +117,47 @@ export default function App() {
     } finally {
       setBusy(false)
     }
+  }
+
+  // Load an example dataset with its codebook settings and run it straight away.
+  // Baselines start unreviewed, exactly as for an uploaded file.
+  async function loadExample(key, openDashboard = false) {
+    const ex = EXAMPLES[key]
+    if (!ex) return
+    setBusy(true)
+    try {
+      const text = await (await fetch(ex.url)).text()
+      const rows = parseIncidents(text)
+      setRecords(rows)
+      setSource(ex.file)
+      setSettings(ex.settings)
+      setResult(null)
+      setErrors([])
+      await run([], undefined, { records: rows, settings: ex.settings })
+      if (openDashboard) setPage('zones')
+    } catch (e) {
+      setErrors([`Could not load the example ${ex.file}: ${e.message}`])
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  // First visit: show something. ?example=<key> picks one, ?example=none starts empty.
+  useEffect(() => {
+    if (MOCK || autoLoaded.current) return
+    autoLoaded.current = true // React dev mode runs effects twice; load once
+    const want = new URLSearchParams(window.location.search).get('example')
+    if (want === 'none') return
+    const key = EXAMPLES[want] ? want : SHOWCASE[Math.floor(Math.random() * SHOWCASE.length)]
+    loadExample(key, true)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // One click for "I have reviewed every usable baseline"; same as_of, like toggleReviewed.
+  function confirmAll() {
+    const zones = result.res.zone_baselines
+      .filter((b) => b.status === 'ready' || b.status === 'unreviewed_baseline').map((b) => b.zone)
+    run(zones, result.res.meta.as_of)
   }
 
   // Confirming a zone's baseline re-runs the analysis at the SAME as_of, so
@@ -199,12 +244,13 @@ export default function App() {
             <DataSettings
               records={records} source={source} settings={settings} res={res} busy={busy}
               onRecords={changeRecords} onSettings={changeSettings} onRun={() => run([])}
+              onLoadExample={(k) => loadExample(k, true)}
               onShowChart={() => setPage('zones')}
             />
           )}
           {page === 'zones' && (
             <ZoneMonitoring
-              res={res} busy={busy} source={source} onToggleReviewed={toggleReviewed}
+              res={res} busy={busy} source={source} onToggleReviewed={toggleReviewed} onConfirmAll={confirmAll}
               onViewIncidents={viewIncidents} onBack={() => setPage('data')}
             />
           )}

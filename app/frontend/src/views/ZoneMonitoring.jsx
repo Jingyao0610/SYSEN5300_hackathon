@@ -16,7 +16,7 @@ function chartRows(base, monitoring, withBaseline) {
 
 const cellClass = (s) => (s === 'high' ? 'hi' : s === 'low' ? 'lo' : s === 'no_signal' ? 'ok' : 'na')
 
-export default function ZoneMonitoring({ res, busy, source, onToggleReviewed, onViewIncidents, onBack }) {
+export default function ZoneMonitoring({ res, busy, source, onToggleReviewed, onConfirmAll, onViewIncidents, onBack }) {
   const zones = useMemo(() => (res ? res.zone_baselines.map((b) => b.zone) : []), [res])
   const [picked, setPicked] = useState('')
   const [focusDate, setFocusDate] = useState('')
@@ -100,8 +100,9 @@ export default function ZoneMonitoring({ res, busy, source, onToggleReviewed, on
 
       {needReview.length > 0 && (
         <p className="callout warn">
-          <b>Baseline review needed:</b> {needReview.join(', ')}. Until a zone&rsquo;s baseline is confirmed below, its days
-          show &ldquo;Baseline not reviewed&rdquo; instead of a verdict.
+          <b>Baseline review needed:</b> {needReview.join(', ')}. Until a zone&rsquo;s baseline is confirmed, its days
+          show &ldquo;Baseline not reviewed&rdquo; instead of a verdict. Check each baseline in the panel below, or
+          {' '}<button className="primary" disabled={busy} onClick={onConfirmAll}>Confirm all usable baselines</button>
         </p>
       )}
 
@@ -139,7 +140,11 @@ export default function ZoneMonitoring({ res, busy, source, onToggleReviewed, on
                 <>
                   <span className="strip-head label"><span>{shortDate(pts[0].date)}</span><span>signal strip · 1 cell = 1 day</span><span>{shortDate(pts[pts.length - 1].date)}</span></span>
                   <span className="strip">
-                    {pts.map((p) => <span key={p.date} className={`cell ${cellClass(p.status)}${b.zone === zone && p.date === day ? ' sel' : ''}`} title={`${p.date}: ${statusInfo(p.status).label}`} />)}
+                    {pts.map((p) => (
+                      <span key={p.date} className={`cell ${cellClass(p.status)}${b.zone === zone && p.date === day ? ' sel' : ''}`}
+                        title={`${p.date}: ${pct(p.rate)} · ${statusInfo(p.status).label} (click to select)`}
+                        onClick={(e) => { e.stopPropagation(); pick(b.zone, p.date) }} />
+                    ))}
                   </span>
                 </>
               )}
@@ -161,13 +166,11 @@ export default function ZoneMonitoring({ res, busy, source, onToggleReviewed, on
                 {zones.map((z) => <option key={z} value={z}>{z}</option>)}
               </select>
             </label>
-            <label className="inline muted" style={{ fontWeight: 500 }}>
-              <input type="checkbox" checked={withBaseline} onChange={(e) => setWithBaseline(e.target.checked)} /> show baseline days
-            </label>
             <button onClick={onBack}>← Back to data</button>
           </div>
           <PChart points={rows} pBar={base.p_bar} zone={zone} selected={day}
-            onPick={(p) => p.period === 'monitoring' && setFocusDate(p.date)} />
+            onPick={(p) => setFocusDate(p.date)}
+            withBaseline={withBaseline} onToggleBaseline={() => setWithBaseline(!withBaseline)} />
           <p className="read">
             <b>How to read this:</b> each point is one day&rsquo;s share of priority-{pr} calls that took more than {target} minutes
             from dispatch to arrival. The shaded band is the range {zone}&rsquo;s baseline predicts for that day&rsquo;s call
@@ -237,7 +240,7 @@ export default function ZoneMonitoring({ res, busy, source, onToggleReviewed, on
         {base.reasons.length > 0 && <p className="notice">{reasonsText(base.reasons)}</p>}
         <h3>Check before confirming</h3>
         <ul className="checklist">
-          <li>Tick &ldquo;show baseline days&rdquo; above: do the grey baseline points drift, or jump?</li>
+          <li>Turn on &ldquo;baseline days&rdquo; in the chart: do the grey baseline points drift, or jump?</li>
           <li>Does any weekday in the table below stand out?</li>
           <li>Confirming records that you reviewed the baseline; it does not prove the days are independent or comparable.</li>
         </ul>

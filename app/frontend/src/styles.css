@@ -335,3 +335,25 @@ details summary { cursor: pointer; font-weight: 600; margin-top: 10px; }
 }
 .metric { display: flex; flex-direction: column; min-width: 0; }
 .zcard .metrics .spark { align-self: center; }
+
+/* interactive chart controls */
+.chart-tools { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 4px 0 10px; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 9px; overflow: hidden; }
+.seg button { border: 0; border-radius: 0; padding: 5px 11px; font-size: .78rem; font-family: var(--mono); background: var(--surface); }
+.seg button + button { border-left: 1px solid var(--line); }
+.seg button.on { background: var(--ink); color: var(--surface); }
+.toggle { font-size: .8rem; padding: 5px 10px; opacity: .55; }
+.toggle.on { opacity: 1; }
+.hint-keys { margin-left: auto; font-family: var(--mono); font-size: .7rem; color: var(--muted); }
+.plot { cursor: crosshair; }
+.plot:focus-visible { outline: 2px solid var(--series); }
+.noband .limit { display: none; }
+.hover-col { fill: var(--ink); opacity: .05; pointer-events: none; }
+.plot * { pointer-events: none; }
+.plot { pointer-events: all; }
+.readout { display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: baseline; font-family: var(--mono); font-size: .8rem;
+  border-top: 1px solid var(--line); margin-top: 6px; padding-top: 8px; }
+.readout b { font-size: .95rem; }
+.cell { cursor: pointer; }
+.cell:hover { outline: 1px solid var(--muted); }
+.chart .tip { top: 96px; }

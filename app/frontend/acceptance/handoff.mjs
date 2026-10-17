@@ -6,6 +6,8 @@ import { readFileSync, writeFileSync, mkdirSync } from 'node:fs'
 import { isDeepStrictEqual } from 'node:util'
 const [H, OUT, COMMIT = 'unknown'] = process.argv.slice(2)
 const PAGE = process.env.FRONTEND_URL || 'http://127.0.0.1:5173/'
+// ?example=none: start empty instead of auto-loading an example dataset
+const START = (() => { const u = new URL(PAGE); u.searchParams.set('example', 'none'); return u.href })()
 const API = (process.env.API_URL || 'http://127.0.0.1:8000').replace(/\/$/, '')
 const CHROME = process.env.CHROME_PATH || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
 mkdirSync(OUT, { recursive: true })
@@ -25,7 +27,7 @@ async function openPage() {
   const p = await b.newPage(); await p.setViewport({ width: 1100, height: 900 })
   p.errs = []; p.on('pageerror', e => p.errs.push(e.message))
   p.got = []; p.on('response', async r => { if (r.url().endsWith('/analyze') && r.request().method() === 'POST') p.got.push({ status: r.status(), body: await r.json().catch(() => null) }) })
-  await p.goto(PAGE, { waitUntil: 'networkidle0' }); await wait()
+  await p.goto(START, { waitUntil: 'networkidle0' }); await wait()
   return p
 }
 const setVal = (p, sel, v) => p.$eval(sel, (el, v) => { Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(el, v); el.dispatchEvent(new Event('input', { bubbles: true })) }, v)

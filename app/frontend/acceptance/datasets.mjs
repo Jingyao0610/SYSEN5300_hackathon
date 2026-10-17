@@ -11,6 +11,8 @@ import { fileURLToPath } from 'node:url'
 const [R, OUT, COMMIT = 'unknown'] = process.argv.slice(2)
 const DATA = fileURLToPath(new URL('../../../data/', import.meta.url))
 const PAGE = process.env.FRONTEND_URL || 'http://127.0.0.1:5173/'
+// ?example=none: start empty instead of auto-loading an example dataset
+const START = (() => { const u = new URL(PAGE); u.searchParams.set('example', 'none'); return u.href })()
 const CHROME = process.env.CHROME_PATH || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
 const SHOTS = new Set((process.env.SCREENSHOT_RUNS || 'jingyao-zone_shift-P1,jingyao-edge-P1,hayden-nyc-2').split(','))
 mkdirSync(OUT, { recursive: true })
@@ -60,7 +62,7 @@ for (const run of plan) {
   p.on('response', async (r) => {
     if (r.url().endsWith('/analyze') && r.request().method() === 'POST') p.got.push({ status: r.status(), body: await r.json().catch(() => null) })
   })
-  await p.goto(PAGE, { waitUntil: 'networkidle0' })
+  await p.goto(START, { waitUntil: 'networkidle0' })
   await wait()
   await p.evaluate(() => {
     window.__blobs = []

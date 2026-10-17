@@ -1,18 +1,25 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { pct, reasonsText, statusInfo } from '../status.js'
 
-// Daily late-rate p chart for ONE zone. Plots only what the API returned:
-// rate, lower, upper per day and the zone's p_bar. No statistics here.
+// Interactive daily late-rate p chart for ONE zone. Plots only what the API
+// returned: rate, lower, upper per day and the zone's p_bar. No statistics here.
+// Hover anywhere to read a day, click (or Enter) to select it, ← / → to step.
 
 const W = 820
 const H = 330
 const PAD = { l: 46, r: 18, t: 30, b: 34 }
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 export const shortDate = (d) => `${MONTHS[Number(d.slice(5, 7)) - 1]} ${Number(d.slice(8, 10))}`
+const RANGES = [['all', 'All'], [21, '21 days'], [14, '14 days'], [7, '7 days']]
 
-export default function PChart({ points, pBar, zone, onPick, selected }) {
+export default function PChart({ points: allPoints, pBar, zone, onPick, selected, withBaseline, onToggleBaseline }) {
   const [hover, setHover] = useState(null)
-  if (points.length === 0) return <p className="muted">No days to plot for zone {zone}.</p>
+  const [range, setRange] = useState('all')
+  const [showBand, setShowBand] = useState(true)
+  const svgRef = useRef(null)
+
+  const points = range === 'all' ? allPoints : allPoints.slice(-range)
+  if (allPoints.length === 0) return <p className="muted">No days to plot for zone {zone}.</p>
 
   const vals = points.flatMap((p) => [p.rate, p.upper, p.lower]).filter((v) => v != null)
   const hi = Math.max(0.05, pBar ?? 0, ...vals)
@@ -37,23 +44,59 @@ export default function PChart({ points, pBar, zone, onPick, selected }) {
   const last = points.length - 1
   const labelled = points.map((p, i) => i).filter((i) => i === last || (i % every === 0 && last - i >= every))
 
-  // label the most extreme formal signal, like an annotation on a printed chart
   let peak = -1
   points.forEach((p, i) => { if (p.status === 'high' && (peak < 0 || p.rate > points[peak].rate)) peak = i })
   const sel = points.findIndex((p) => p.date === selected && p.period === 'monitoring')
+  const shown = hover ?? (sel >= 0 ? sel : null)
+
+  // pointer position -> nearest day index (SVG is scaled to the figure width)
+  const indexAt = (e) => {
+    const r = svgRef.current.getBoundingClientRect()
+    const sx = ((e.clientX - r.left) / r.width) * W
+    return Math.min(points.length - 1, Math.max(0, Math.floor((sx - PAD.l) / slot)))
+  }
+  const pickIndex = (i) => { if (points[i]?.period === 'monitoring') onPick?.(points[i]) }
+  const monIdx = points.map((p, i) => (p.period === 'monitoring' ? i : -1)).filter((i) => i >= 0)
+  const onKey = (e) => {
+    if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return
+    e.preventDefault()
+    const cur = sel >= 0 ? monIdx.indexOf(sel) : e.key === 'ArrowLeft' ? monIdx.length : -1
+    const next = monIdx[Math.min(monIdx.length - 1, Math.max(0, cur + (e.key === 'ArrowRight' ? 1 : -1)))]
+    if (next != null) { setHover(null); pickIndex(next) }
+  }
 
   return (
-    <figure className="chart" onMouseLeave={() => setHover(null)}>
+    <figure className="chart">
+      <div className="chart-tools">
+        <span className="seg" role="group" aria-label="Date range">
+          {RANGES.map(([k, label]) => (
+            <button key={k} className={range === k ? 'on' : ''} onClick={() => setRange(k)} aria-pressed={range === k}>{label}</button>
+          ))}
+        </span>
+        <button className={showBand ? 'toggle on' : 'toggle'} onClick={() => setShowBand(!showBand)} aria-pressed={showBand}>
+          <svg width="18" height="10"><rect width="18" height="10" fill="var(--band)" /><line x1="0" x2="18" y1="1" y2="1" className="keyline limit" /><line x1="0" x2="18" y1="9" y2="9" className="keyline limit" /></svg>
+          3σ control limits
+        </button>
+        {onToggleBaseline && (
+          <button className={withBaseline ? 'toggle on' : 'toggle'} onClick={onToggleBaseline} aria-pressed={!!withBaseline}>
+            <svg width="18" height="10"><line x1="0" x2="18" y1="5" y2="5" className="series base" /></svg>
+            baseline days
+          </button>
+        )}
+        <span className="hint-keys">hover · click a day · ← → to step</span>
+      </div>
       <figcaption className="key">
         <span><svg width="22" height="10"><line x1="0" x2="22" y1="5" y2="5" className="series" /></svg>Daily late share</span>
         <span><svg width="22" height="10"><line x1="0" x2="22" y1="5" y2="5" className="keyline center" /></svg>{`Baseline p̄ ${pct(pBar)}`}</span>
-        <span><svg width="22" height="12"><rect width="22" height="12" fill="var(--band)" /><line x1="0" x2="22" y1="1" y2="1" className="keyline limit" /><line x1="0" x2="22" y1="11" y2="11" className="keyline limit" /></svg>3σ control limits</span>
         <span><svg width="12" height="12"><circle cx="6" cy="6" r="5" className="mk critical" /></svg>Above UCL</span>
         <span><svg width="14" height="14"><Marker cx={7} cy={7} status="low" small /></svg>Below LCL</span>
         <span><svg width="12" height="12"><circle cx="6" cy="6" r="4" className="mk hollow pending" /></svg>No verdict yet</span>
       </figcaption>
-      <svg viewBox={`0 0 ${W} ${H}`} role="img"
-        aria-label={`Daily late rate for zone ${zone}, ${points.length} days. Details are in the table below.`}>
+
+      <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`} role="img" tabIndex={0} className={showBand ? 'plot' : 'plot noband'}
+        aria-label={`Daily late rate for zone ${zone}, ${points.length} days. Use the left and right arrow keys to step through days; details are in the table below.`}
+        onPointerMove={(e) => setHover(indexAt(e))} onPointerLeave={() => setHover(null)}
+        onClick={(e) => pickIndex(indexAt(e))} onKeyDown={onKey}>
         {split != null && <rect className="base-zone" x={PAD.l} y={PAD.t} width={split - PAD.l} height={H - PAD.t - PAD.b} />}
 
         {ticks.map((t) => (
@@ -81,12 +124,9 @@ export default function PChart({ points, pBar, zone, onPick, selected }) {
           </g>
         )}
 
-        {pBar != null && (
-          <g className="center">
-            <line x1={PAD.l} x2={W - PAD.r} y1={y(pBar)} y2={y(pBar)} />
-          </g>
-        )}
+        {pBar != null && <g className="center"><line x1={PAD.l} x2={W - PAD.r} y1={y(pBar)} y2={y(pBar)} /></g>}
 
+        {shown != null && <rect className="hover-col" x={x(shown) - slot / 2} y={PAD.t} width={slot} height={H - PAD.t - PAD.b} />}
         {hover != null && <line className="cross" x1={x(hover)} x2={x(hover)} y1={PAD.t} y2={H - PAD.b} />}
 
         <polyline className="series base" points={line(0, firstMon < 0 ? points.length : firstMon)} />
@@ -94,20 +134,9 @@ export default function PChart({ points, pBar, zone, onPick, selected }) {
 
         {sel >= 0 && points[sel].rate != null && <circle className="ring" cx={x(sel)} cy={y(points[sel].rate)} r="11" />}
 
-        {points.map((p, i) => {
-          if (p.rate == null) return null
-          const info = statusInfo(p.status)
-          return (
-            <g key={`pt${i}`}>
-              <Marker cx={x(i)} cy={y(p.rate)} status={p.status} big={hover === i || i === peak} />
-              <circle cx={x(i)} cy={y(p.rate)} r={Math.max(10, slot / 2)} className="hit"
-                onMouseEnter={() => setHover(i)} onFocus={() => setHover(i)} tabIndex={0}
-                onClick={() => onPick?.(p)} onKeyDown={(e) => { if (e.key === 'Enter') onPick?.(p) }}>
-                <title>{`${p.date}: ${pct(p.rate)} (${p.late}/${p.n}) - ${info.label}`}</title>
-              </circle>
-            </g>
-          )
-        })}
+        {points.map((p, i) => (p.rate == null ? null : (
+          <Marker key={`pt${i}`} cx={x(i)} cy={y(p.rate)} status={p.status} big={hover === i || i === peak} />
+        )))}
 
         {peak >= 0 && (
           <text className="peak" x={x(peak)} y={y(points[peak].rate) - 14} textAnchor="middle">
@@ -115,12 +144,21 @@ export default function PChart({ points, pBar, zone, onPick, selected }) {
           </text>
         )}
 
-        {labelled.map((i) => (
-          <text key={`d${i}`} x={x(i)} y={H - 10} textAnchor="middle">{shortDate(points[i].date)}</text>
-        ))}
+        {labelled.map((i) => <text key={`d${i}`} x={x(i)} y={H - 10} textAnchor="middle">{shortDate(points[i].date)}</text>)}
       </svg>
 
-      {hover != null && <Tooltip p={points[hover]} pBar={pBar} left={(x(hover) / W) * 100} clickable={!!onPick} />}
+      {hover != null && <Tooltip p={points[hover]} pBar={pBar} left={(x(hover) / W) * 100} />}
+
+      {shown != null && (
+        <div className="readout" aria-live="polite">
+          <b>{shortDate(points[shown].date)}</b>
+          <span>{points[shown].period}</span>
+          <span>{`${points[shown].late} / ${points[shown].n} late`}</span>
+          <span>{pct(points[shown].rate)}</span>
+          <span>{`limits ${pct(points[shown].lower)} – ${pct(points[shown].upper)}`}</span>
+          <span>{`${statusInfo(points[shown].status).icon} ${statusInfo(points[shown].status).label}`}</span>
+        </div>
+      )}
     </figure>
   )
 }
@@ -133,11 +171,11 @@ function Marker({ cx, cy, status, small, big }) {
     return <path className={`mk ${info.tone}`} d={`M${cx - s},${cy - s * 0.6} L${cx + s},${cy - s * 0.6} L${cx},${cy + s * 0.9} Z`} />
   }
   if (status === 'high') return <circle className="mk critical" cx={cx} cy={cy} r={big ? 7 : 5.5} />
-  if (info.formal) return <circle className={`mk ${info.tone}`} cx={cx} cy={cy} r={small ? 3 : 3.2} />
+  if (info.formal) return <circle className={`mk ${info.tone}`} cx={cx} cy={cy} r={small ? 3 : big ? 5 : 3.2} />
   return <circle className={`mk hollow ${info.tone}`} cx={cx} cy={cy} r={r - 1} />
 }
 
-function Tooltip({ p, pBar, left, clickable }) {
+function Tooltip({ p, pBar, left }) {
   const info = statusInfo(p.status)
   return (
     <div className="tip" style={{ left: `${Math.min(Math.max(left, 16), 84)}%` }} role="status">
@@ -146,7 +184,7 @@ function Tooltip({ p, pBar, left, clickable }) {
       <div>{`Limits ${pct(p.lower)} – ${pct(p.upper)} · p̄ ${pct(pBar)}`}</div>
       <div>{`${info.icon} ${info.label}`}</div>
       {p.reasons?.length > 0 && <div className="muted">{reasonsText(p.reasons)}</div>}
-      {clickable && p.late > 0 && <div className="hint">Click to list this day&rsquo;s slowest arrivals</div>}
+      {p.period === 'monitoring' && <div className="hint">Click to select this day</div>}
     </div>
   )
 }
