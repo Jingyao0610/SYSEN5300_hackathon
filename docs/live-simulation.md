@@ -95,4 +95,14 @@ An exported step-7 run contained 4,350 rows, all `synthetic=true`: 4,000 baselin
 
 The local API was deliberately stopped at step 8. The browser displayed the connection failure and stayed paused at 4,400 rows with the prior successful clock/result. Restarting the API and retrying advanced to step 9. No fabricated response was substituted. Local integration was checked with the teammate's supervisor-console UI and its light/dark theme controls.
 
-Deployment verification is pending until the existing deliverable has been updated and checked in a browser.
+Commit `8815a1b` was published by GitHub Actions run `38985494228` (successful build, publish and HTTP check). In the existing deployed site's real mode, seed 5300 loaded 4,000 usable rows; confirming the two baselines and advancing the slower-A scenario to step 4 reproduced 36/100 and one high signal. Switching the ordinary example to NYC and then zone_shift preserved the separate simulation's 4,200 rows and result. The local full run also stopped automatically at step 40 with 6,000 usable rows, ten high days in A and no formal signals in B.
+
+## Example and import request ordering
+
+The random first-visit example remains a random selection from the existing showcase CSVs. It does not generate a stream. Live Simulation retains its own seeded records and analysis, and switching ordinary examples does not reset it.
+
+The follow-up fix rejects obsolete work throughout ordinary example download, CSV reading and analysis. A new input intent or analysis cancels the previous request and invalidates its completion token; an old success, failure or cleanup cannot restore obsolete data, results, errors, busy state or navigation. Cancellation also covers operations whose underlying transport ignores abort. The latest settings always require their own successful analysis. Example downloads validate the HTTP status before parsing.
+
+The follow-up passed 17 request-ordering regressions, including stale downloads, responses, errors, navigation and reversed file-read completion. The complete frontend suite printed `Test Files 7 passed (7); Tests 54 passed (54)`. Production build printed `53 modules transformed; built in 5.29s`. Re-running the unchanged backend printed `175 passed, 1 warning in 2.41s`; generated-stream verification again passed all 10 cases.
+
+In the local React StrictMode browser, first-visit random loading completed normally. Loading the NYC example and immediately changing the target to 20 left the page at 20 with no current result after the old request completed; explicitly running again returned an analysis at 20. Loading zone_shift and confirming its baselines still produced eight signals. Importing small.csv then replaced the session with three rows and invalidated the prior result. Independent code review found no blocking issue in the integration. Deployment verification for this follow-up is pending.

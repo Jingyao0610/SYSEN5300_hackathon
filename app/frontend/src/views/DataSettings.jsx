@@ -1,5 +1,5 @@
-import { useMemo, useRef, useState } from 'react'
-import { COLUMNS, extraColumns, parseIncidents, toCsv } from '../csv.js'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { COLUMNS, extraColumns, toCsv } from '../csv.js'
 import { pct, reasonText, reasonsText } from '../status.js'
 import { nyLocalToIso, showNy } from '../time.js'
 import { EXAMPLES } from '../examples.js'
@@ -7,8 +7,7 @@ import { EXAMPLES } from '../examples.js'
 const PREVIEW_ROWS = 100
 const EMPTY_FORM = { incident_id: '', zone: '', priority: '', dispatched_at: '', on_scene_at: '' }
 
-export default function DataSettings({ records, source, settings, res, busy, onRecords, onSettings, onRun, onShowChart, onLoadExample }) {
-  const [importError, setImportError] = useState('')
+export default function DataSettings({ records, source, settings, res, busy, onRecords, onSettings, onRun, onShowChart, onLoadExample, onInputIntent, onImportFile }) {
   const [form, setForm] = useState(null)
   const [over, setOver] = useState(false)
   const [example, setExample] = useState('zone_shift')
@@ -21,29 +20,34 @@ export default function DataSettings({ records, source, settings, res, busy, onR
     [res]
   )
 
-  async function importFile(file) {
-    if (!file) return
-    try {
-      const rows = parseIncidents(await file.text())
-      setImportError('')
-      onRecords(rows, file.name) // replaces the current session
-      const ps = [...new Set(rows.map((r) => r.priority).filter(Boolean))].sort()
-      if (!ps.includes(settings.selected_priority)) onSettings({ selected_priority: ps[0] ?? '' })
-    } catch (err) {
-      setImportError(`${file.name}: ${err.message}`)
-    }
+  // Leaving this view invalidates a pending read before it can replace records.
+  useEffect(() => () => onInputIntent(), [onInputIntent])
+
+  function chooseFile() {
+    onInputIntent()
+    fileRef.current?.click()
+  }
+
+  function startForm() {
+    onInputIntent()
+    setForm({ ...EMPTY_FORM, priority: settings.selected_priority })
+  }
+
+  function changeForm(patch) {
+    onInputIntent()
+    setForm((current) => ({ ...current, ...patch }))
   }
 
   function onPick(e) {
     const file = e.target.files?.[0]
     e.target.value = ''
-    importFile(file)
+    onImportFile(file)
   }
 
   function onDrop(e) {
     e.preventDefault()
     setOver(false)
-    importFile(e.dataTransfer.files?.[0])
+    onImportFile(e.dataTransfer.files?.[0])
   }
 
   function exportCsv() {
@@ -96,24 +100,24 @@ export default function DataSettings({ records, source, settings, res, busy, onR
         <div className="row">
           <label className="inline">
             Try an example
-            <select value={example} onChange={(e) => setExample(e.target.value)} aria-label="Example dataset">
+            <select value={example} onChange={(e) => { onInputIntent(); setExample(e.target.value) }} aria-label="Example dataset">
               {Object.entries(EXAMPLES).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
             </select>
           </label>
-          <button className="primary" disabled={busy} onClick={() => onLoadExample(example)}>
-            {busy ? 'Loading…' : 'Load & analyse example'}
+          <button className="primary" onClick={() => onLoadExample(example)}>
+            {busy ? 'Load selected example' : 'Load & analyse example'}
           </button>
           <span className="muted">or use your own file below</span>
         </div>
 
         <div
           className={over ? 'drop over' : 'drop'}
-          onClick={() => fileRef.current?.click()}
+          onClick={chooseFile}
           onDragOver={(e) => { e.preventDefault(); setOver(true) }}
           onDragLeave={() => setOver(false)}
           onDrop={onDrop}
           role="button" tabIndex={0}
-          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') fileRef.current?.click() }}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); chooseFile() } }}
         >
           <div className="big-ic" aria-hidden="true">⬆️</div>
           <b>Drop a CSV here, or click to choose a file</b>
@@ -121,12 +125,12 @@ export default function DataSettings({ records, source, settings, res, busy, onR
             Columns <code>{COLUMNS.join(', ')}</code>; times with a UTC offset, e.g. <code>2026-09-21T08:15:00-04:00</code>.
             Importing replaces the current session.
           </span>
-          <input ref={fileRef} type="file" accept=".csv,text/csv" onChange={onPick} hidden />
+          <input ref={fileRef} type="file" accept=".csv,text/csv" onChange={onPick} onClick={(e) => e.stopPropagation()} hidden />
         </div>
 
         <div className="row">
-          <button onClick={() => fileRef.current?.click()}>Import CSV</button>
-          <button onClick={() => setForm({ ...EMPTY_FORM, priority: settings.selected_priority })} disabled={!!form}>
+          <button onClick={chooseFile}>Import CSV</button>
+          <button onClick={startForm} disabled={!!form}>
             Add completed response
           </button>
           <button onClick={exportCsv} disabled={records.length === 0}>Export CSV</button>
@@ -138,7 +142,6 @@ export default function DataSettings({ records, source, settings, res, busy, onR
             {extras.length > 0 && ` · extra column(s) kept for export, not analysed: ${extras.join(', ')}`}
           </span>
         </div>
-        {importError && <p className="error" role="alert">{importError}</p>}
 
         {form && (
           <form className="entry" onSubmit={saveForm}>
@@ -147,14 +150,14 @@ export default function DataSettings({ records, source, settings, res, busy, onR
             {['incident_id', 'zone', 'priority'].map((k) => (
               <label key={k}>
                 {k}
-                <input required value={form[k]} onChange={(e) => setForm({ ...form, [k]: e.target.value })} />
+                <input required value={form[k]} onChange={(e) => changeForm({ [k]: e.target.value })} />
               </label>
             ))}
             {['dispatched_at', 'on_scene_at'].map((k) => (
               <label key={k}>
                 {k}
                 <input type="datetime-local" step="1" required value={form[k]}
-                  onChange={(e) => setForm({ ...form, [k]: e.target.value })} />
+                  onChange={(e) => changeForm({ [k]: e.target.value })} />
               </label>
             ))}
             <div className="row">

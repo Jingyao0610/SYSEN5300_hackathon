@@ -223,11 +223,17 @@ tasks:
       replacement of Pingchuan's work or approval of the UI concept redesign.
       Reuse the current backend and statistics unchanged; publish the frontend
       through the existing deployment workflow to the established website.
+      Follow-up authorized by Shifeng: retain PC's random example loader and
+      the simulation, and protect ordinary analysis/import/example loading
+      from stale responses after a newer user action.
     definition_of_done: >
       npm --prefix app/frontend test and npm --prefix app/frontend run build pass.
       pytest tests and node app/frontend/acceptance/simulation_core_check.mjs pass,
       including actual generated-record/core/API checks.
       Browser verifies initialize, review, start/pause, closed-day signals,
       scenario switch, reset, export, session isolation and API-error behavior.
+      Regression tests reject stale example downloads, stale analyses and
+      stale file reads; changing a target during loading cannot restore an
+      analysis for the old target. Example loading still works normally.
       The existing deployed website shows the new feature and real API results.
-    result: "Implemented; 37 frontend tests, 175 backend tests and 10 generated-stream parity cases pass. Local browser controls, failure recovery and export verified; existing-site deployment pending."
+    result: "Simulation deployed at 8815a1b via run 38985494228 and verified live. Follow-up request-ordering fixes pass 54 frontend tests (17 race regressions), 175 backend tests and 10 stream parity cases; local browser parameter-edit, example and CSV-import checks pass. Follow-up deployment verification pending."

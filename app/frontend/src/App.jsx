@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { API_URL, MOCK, analyze, health, mockScenarios } from './api.js'
 import { parseIncidents } from './csv.js'
 import { EXAMPLES, SHOWCASE } from './examples.js'
+import { createRequestLifecycle } from './request-lifecycle.js'
 import { pct } from './status.js'
 import { TZ, nyLocalToIso, nyMidnightIso, showNy } from './time.js'
 import DataSettings from './views/DataSettings.jsx'
@@ -30,7 +31,27 @@ export default function App() {
   const [api, setApi] = useState({ state: 'checking' })
   const [mock, setMock] = useState(null) // { scenarios, csv, picked }
   const errorRef = useRef(null)
-  const autoLoaded = useRef(false)
+  const initialExample = useRef(undefined)
+  const [requests] = useState(() => createRequestLifecycle({
+    analyze,
+    parseIncidents,
+    onBusy: setBusy,
+    onErrors: setErrors,
+    onResult: setResult,
+    onDataset: ({ records: next, source: label, settings: nextSettings }) => {
+      setRecords(next)
+      setSource(label)
+      setResult(null)
+      if (nextSettings) setSettings(nextSettings)
+      else {
+        const priorities = [...new Set(next.map((r) => r.priority).filter(Boolean))].sort()
+        setSettings((current) => priorities.includes(current.selected_priority)
+          ? current : { ...current, selected_priority: priorities[0] ?? '' })
+      }
+    },
+    onNavigate: (operation) => setPage((current) =>
+      operation.isCurrent() && current !== 'simulation' ? 'zones' : current),
+  }))
   const [theme, setTheme] = useState(() => {
     try { return localStorage.getItem('theme') || 'auto' } catch { return 'auto' }
   })
@@ -49,15 +70,17 @@ export default function App() {
   }, [errors])
 
   useEffect(() => {
+    let active = true
     health()
-      .then((h) => setApi({ state: 'ok', mode: h.analysis_mode }))
-      .catch(() => setApi({ state: 'down' }))
-    if (MOCK) mockScenarios().then((m) => setMock({ ...m, picked: '' }))
+      .then((h) => { if (active) setApi({ state: 'ok', mode: h.analysis_mode }) })
+      .catch(() => { if (active) setApi({ state: 'down' }) })
+    if (MOCK) mockScenarios().then((m) => { if (active) setMock({ ...m, picked: '' }) })
+    return () => { active = false }
   }, [])
 
   // Any change to data or settings makes the old result stale: drop it, and
   // with it every baseline confirmation. A new Run analysis is required.
-  const invalidate = () => { setResult(null); setErrors([]) }
+  const invalidate = () => { requests.cancel(); setResult(null) }
   const changeRecords = (next, label) => { setRecords(next); if (label !== undefined) setSource(label); invalidate() }
   const changeSettings = (patch) => { setSettings((s) => ({ ...s, ...patch })); invalidate() }
 
@@ -96,62 +119,39 @@ export default function App() {
     return req
   }
 
-  async function run(reviewedZones = [], asOf, ctx) {
-    let req
-    try {
-      req = buildRequest(reviewedZones, asOf, ctx)
-    } catch (e) {
-      setErrors(Array.isArray(e) ? e : [e.message])
-      return
-    }
-    setBusy(true)
-    setErrors([])
-    try {
-      const res = await analyze(req, mock?.picked)
-      // a review re-run reuses the earlier as_of, so it keeps the earlier label
-      setResult({ res, serverClock: asOf ? !!result?.serverClock : !req.as_of })
-    } catch (e) {
-      setResult(null)
-      const head = e.status === 422 ? 'The API rejected the request (HTTP 422).'
-        : e.status === 503 ? 'The analysis service is not available yet (HTTP 503).'
-        : 'Analysis failed.'
-      setErrors([head, e.message, ...(e.fields?.length ? [`Field(s): ${e.fields.join(', ')}`] : [])])
-    } finally {
-      setBusy(false)
-    }
+  function run(reviewedZones = [], asOf) {
+    return requests.runAnalysis({
+      buildRequest: () => buildRequest(reviewedZones, asOf),
+      serverClock: asOf ? !!result?.serverClock : undefined,
+      mockScenario: mock?.picked,
+    })
   }
 
-  // Load an example dataset with its codebook settings and run it straight away.
-  // Baselines start unreviewed, exactly as for an uploaded file.
-  async function loadExample(key, openDashboard = false) {
-    const ex = EXAMPLES[key]
-    if (!ex) return
-    setBusy(true)
-    try {
-      const text = await (await fetch(ex.url)).text()
-      const rows = parseIncidents(text)
-      setRecords(rows)
-      setSource(ex.file)
-      setSettings(ex.settings)
-      setResult(null)
-      setErrors([])
-      await run([], undefined, { records: rows, settings: ex.settings })
-      if (openDashboard) setPage((current) => current === 'simulation' ? current : 'zones')
-    } catch (e) {
-      setErrors([`Could not load the example ${ex.file}: ${e.message}`])
-    } finally {
-      setBusy(false)
-    }
+  // The fetch, CSV parse and analysis share one operation, so none can outlive
+  // a newer example, manual edit or file import.
+  function loadExample(key, openDashboard = false) {
+    const example = EXAMPLES[key]
+    if (!example) return
+    return requests.loadExample({
+      example,
+      buildRequest: (ctx) => buildRequest([], undefined, ctx),
+      mockScenario: mock?.picked,
+      openDashboard,
+    })
   }
 
-  // First visit: show something. ?example=<key> picks one, ?example=none starts empty.
+  // First visit: show something. StrictMode cleanup aborts its first setup;
+  // the second setup restarts the same chosen example rather than suppressing it.
   useEffect(() => {
-    if (MOCK || autoLoaded.current) return
-    autoLoaded.current = true // React dev mode runs effects twice; load once
-    const want = new URLSearchParams(window.location.search).get('example')
-    if (want === 'none') return
-    const key = EXAMPLES[want] ? want : SHOWCASE[Math.floor(Math.random() * SHOWCASE.length)]
-    loadExample(key, true)
+    if (!MOCK) {
+      if (initialExample.current === undefined) {
+        const want = new URLSearchParams(window.location.search).get('example')
+        initialExample.current = want === 'none' ? null
+          : EXAMPLES[want] ? want : SHOWCASE[Math.floor(Math.random() * SHOWCASE.length)]
+      }
+      if (initialExample.current) loadExample(initialExample.current, true)
+    }
+    return () => requests.dispose()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -246,6 +246,7 @@ export default function App() {
             <DataSettings
               records={records} source={source} settings={settings} res={res} busy={busy}
               onRecords={changeRecords} onSettings={changeSettings} onRun={() => run([])}
+              onInputIntent={requests.cancel} onImportFile={requests.importFile}
               onLoadExample={(k) => loadExample(k, true)}
               onShowChart={() => setPage('zones')}
             />
