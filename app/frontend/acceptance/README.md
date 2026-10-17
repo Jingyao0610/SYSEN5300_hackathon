@@ -13,6 +13,18 @@ every `/analyze` response the browser receives with the core's own result.
 | [`datasets.mjs`](datasets.mjs) | All 7 `data/` CSVs with each codebook's settings, plus P2 for the four regular synthetic files: 11 runs | **110/110** — [results](results/datasets_e189c4b.txt) |
 | [`handoff.mjs`](handoff.mjs) | Shifeng's 9 core handoff cases (K1/K3 high and boundary, insufficient, unreviewed, current day, 3/2/1, empty) plus an extra-CSV-column round trip | **70/70** — [results](results/handoff_e189c4b.txt) |
 
+### Live site, latest (`921fbac`: example data on first visit, interactive chart)
+
+Retested live with no local servers. The scripts open the page with `?example=none` so each run starts empty. Results:
+- `datasets.mjs`: **110/110** ([results](results/live_datasets_921fbac.txt));
+- `handoff.mjs`: **70/70** ([results](results/live_handoff_921fbac.txt)).
+
+Also checked on the live site:
+- a fresh visit auto-loads an example into the dashboard;
+- all four example CSVs are served at their exact `data/` sizes;
+- hovering the chart shows the tooltip;
+- no page errors.
+
 ### Live site after the dashboard redesign (`9d5ca9e`)
 
 The redesigned dashboard (light and dark themes) was redeployed and retested live, with no local servers:

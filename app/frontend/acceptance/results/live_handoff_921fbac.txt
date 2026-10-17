@@ -1,0 +1,75 @@
+Browser acceptance, nine handoff cases + extra columns, real UI + API, mock disabled
+Commit tested: live site on Posit Connect, built from 921fbac; no local servers running; page under test given by FRONTEND_URL
+
+PASS  k1_high        HTTP 200, response identical to core expected
+PASS  k1_high        reviewed_zones sent as in request
+PASS  k1_high        daily row shows n, late, rate, limits
+PASS  k1_high        status shown "High late rate"
+PASS  k1_high        formal signals = 1
+PASS  k1_high        coverage 2100 usable / 0 excluded of 2100
+PASS  k1_high        time zone, target, as_of visible
+PASS  k1_high        no MOCK banner, no page errors
+PASS  k1_boundary    HTTP 200, response identical to core expected
+PASS  k1_boundary    reviewed_zones sent as in request
+PASS  k1_boundary    daily row shows n, late, rate, limits
+PASS  k1_boundary    status shown "No signal"
+PASS  k1_boundary    formal signals = 0
+PASS  k1_boundary    coverage 2100 usable / 0 excluded of 2100
+PASS  k1_boundary    time zone, target, as_of visible
+PASS  k1_boundary    no MOCK banner, no page errors
+PASS  k3_high        HTTP 200, response identical to core expected
+PASS  k3_high        reviewed_zones sent as in request
+PASS  k3_high        daily row shows n, late, rate, limits
+PASS  k3_high        status shown "High late rate"
+PASS  k3_high        formal signals = 1
+PASS  k3_high        coverage 2400 usable / 0 excluded of 2400
+PASS  k3_high        time zone, target, as_of visible
+PASS  k3_high        no MOCK banner, no page errors
+PASS  k3_boundary    HTTP 200, response identical to core expected
+PASS  k3_boundary    reviewed_zones sent as in request
+PASS  k3_boundary    daily row shows n, late, rate, limits
+PASS  k3_boundary    status shown "No signal"
+PASS  k3_boundary    formal signals = 0
+PASS  k3_boundary    coverage 2400 usable / 0 excluded of 2400
+PASS  k3_boundary    time zone, target, as_of visible
+PASS  k3_boundary    no MOCK banner, no page errors
+PASS  insufficient   HTTP 200, response identical to core expected
+PASS  insufficient   reviewed_zones sent as in request
+PASS  insufficient   daily row shows n, late, rate, limits
+PASS  insufficient   status shown "Insufficient data"
+PASS  insufficient   formal signals = 0
+PASS  insufficient   coverage 2049 usable / 0 excluded of 2049
+PASS  insufficient   time zone, target, as_of visible
+PASS  insufficient   no MOCK banner, no page errors
+PASS  unreviewed     HTTP 200, response identical to core expected
+PASS  unreviewed     reviewed_zones sent as in request
+PASS  unreviewed     daily row shows n, late, rate, limits
+PASS  unreviewed     status shown "Baseline not reviewed"
+PASS  unreviewed     formal signals = 0
+PASS  unreviewed     coverage 2100 usable / 0 excluded of 2100
+PASS  unreviewed     time zone, target, as_of visible
+PASS  unreviewed     no MOCK banner, no page errors
+PASS  current_day    HTTP 200, response identical to core expected
+PASS  current_day    reviewed_zones sent as in request
+PASS  current_day    daily row shows n, late, rate, limits
+PASS  current_day    status shown "Provisional (today)"
+PASS  current_day    formal signals = 0
+PASS  current_day    coverage 2100 usable / 0 excluded of 2100
+PASS  current_day    time zone, target, as_of visible
+PASS  current_day    no MOCK banner, no page errors
+PASS  small_3_2_1    HTTP 200, response identical to core expected
+PASS  small_3_2_1    reviewed_zones sent as in request
+PASS  small_3_2_1    daily row shows n, late, rate, limits
+PASS  small_3_2_1    status shown "Insufficient data"
+PASS  small_3_2_1    formal signals = 0
+PASS  small_3_2_1    coverage 2 usable / 1 excluded of 3
+PASS  small_3_2_1    time zone, target, as_of visible
+PASS  small_3_2_1    no MOCK banner, no page errors
+PASS  small_3_2_1    exclusion reason shown
+PASS  empty          UI: header-only CSV loads 0 rows, Run asks for a priority, nothing sent
+PASS  empty          HTTP: 200, identical to core expected (empty_input)
+PASS  extra columns  API accepts records with extra keys; result identical to small case
+PASS  extra columns  page lists the kept columns
+PASS  extra columns  export keeps both extra columns and their values
+
+70/70 checks passed

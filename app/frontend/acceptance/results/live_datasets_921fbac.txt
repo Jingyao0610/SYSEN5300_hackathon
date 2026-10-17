@@ -1,0 +1,116 @@
+Browser acceptance, all data/ CSVs, real UI + API, mock disabled
+Commit tested: live site on Posit Connect, built from 921fbac; no local servers running; page under test given by FRONTEND_URL
+
+PASS  jingyao-stable-P1        import: page shows 12000 rows
+PASS  jingyao-stable-P1        analysis, nothing reviewed: HTTP 200, identical to core
+PASS  jingyao-stable-P1        analysis after confirming [A,B]: identical to core
+PASS  jingyao-stable-P1        coverage shown: all 12000/0/12000, priority 6000/0/6000 (usable/excluded/total)
+PASS  jingyao-stable-P1        formal signals listed: 0
+PASS  jingyao-stable-P1        table: all 20 monitoring rows show core n/late/rate/limits/status
+PASS  jingyao-stable-P1        charts: 2 zone(s), one marker per day with a rate, limits per day, p̄ line
+PASS  jingyao-stable-P1        incident review lists all 901 late responses
+PASS  jingyao-stable-P1        export: CSV identical to the imported file
+PASS  jingyao-stable-P1        no MOCK banner, no page errors
+PASS  jingyao-stable-P2        import: page shows 12000 rows
+PASS  jingyao-stable-P2        analysis, nothing reviewed: HTTP 200, identical to core
+PASS  jingyao-stable-P2        analysis after confirming [A,B]: identical to core
+PASS  jingyao-stable-P2        coverage shown: all 12000/0/12000, priority 6000/0/6000 (usable/excluded/total)
+PASS  jingyao-stable-P2        formal signals listed: 0
+PASS  jingyao-stable-P2        table: all 20 monitoring rows show core n/late/rate/limits/status
+PASS  jingyao-stable-P2        charts: 2 zone(s), one marker per day with a rate, limits per day, p̄ line
+PASS  jingyao-stable-P2        incident review lists all 894 late responses
+PASS  jingyao-stable-P2        export: CSV identical to the imported file
+PASS  jingyao-stable-P2        no MOCK banner, no page errors
+PASS  jingyao-zone_shift-P1    import: page shows 12000 rows
+PASS  jingyao-zone_shift-P1    analysis, nothing reviewed: HTTP 200, identical to core
+PASS  jingyao-zone_shift-P1    analysis after confirming [A,B]: identical to core
+PASS  jingyao-zone_shift-P1    coverage shown: all 12000/0/12000, priority 6000/0/6000 (usable/excluded/total)
+PASS  jingyao-zone_shift-P1    formal signals listed: 8
+PASS  jingyao-zone_shift-P1    table: all 20 monitoring rows show core n/late/rate/limits/status
+PASS  jingyao-zone_shift-P1    charts: 2 zone(s), one marker per day with a rate, limits per day, p̄ line
+PASS  jingyao-zone_shift-P1    incident review lists all 1091 late responses
+PASS  jingyao-zone_shift-P1    export: CSV identical to the imported file
+PASS  jingyao-zone_shift-P1    no MOCK banner, no page errors
+PASS  jingyao-zone_shift-P2    import: page shows 12000 rows
+PASS  jingyao-zone_shift-P2    analysis, nothing reviewed: HTTP 200, identical to core
+PASS  jingyao-zone_shift-P2    analysis after confirming [A,B]: identical to core
+PASS  jingyao-zone_shift-P2    coverage shown: all 12000/0/12000, priority 6000/0/6000 (usable/excluded/total)
+PASS  jingyao-zone_shift-P2    formal signals listed: 0
+PASS  jingyao-zone_shift-P2    table: all 20 monitoring rows show core n/late/rate/limits/status
+PASS  jingyao-zone_shift-P2    charts: 2 zone(s), one marker per day with a rate, limits per day, p̄ line
+PASS  jingyao-zone_shift-P2    incident review lists all 894 late responses
+PASS  jingyao-zone_shift-P2    export: CSV identical to the imported file
+PASS  jingyao-zone_shift-P2    no MOCK banner, no page errors
+PASS  shifeng-stable-P1        import: page shows 12000 rows
+PASS  shifeng-stable-P1        analysis, nothing reviewed: HTTP 200, identical to core
+PASS  shifeng-stable-P1        analysis after confirming [A,B]: identical to core
+PASS  shifeng-stable-P1        coverage shown: all 12000/0/12000, priority 6000/0/6000 (usable/excluded/total)
+PASS  shifeng-stable-P1        formal signals listed: 0
+PASS  shifeng-stable-P1        table: all 20 monitoring rows show core n/late/rate/limits/status
+PASS  shifeng-stable-P1        charts: 2 zone(s), one marker per day with a rate, limits per day, p̄ line
+PASS  shifeng-stable-P1        incident review lists all 876 late responses
+PASS  shifeng-stable-P1        export: CSV identical to the imported file
+PASS  shifeng-stable-P1        no MOCK banner, no page errors
+PASS  shifeng-stable-P2        import: page shows 12000 rows
+PASS  shifeng-stable-P2        analysis, nothing reviewed: HTTP 200, identical to core
+PASS  shifeng-stable-P2        analysis after confirming [A,B]: identical to core
+PASS  shifeng-stable-P2        coverage shown: all 12000/0/12000, priority 6000/0/6000 (usable/excluded/total)
+PASS  shifeng-stable-P2        formal signals listed: 0
+PASS  shifeng-stable-P2        table: all 20 monitoring rows show core n/late/rate/limits/status
+PASS  shifeng-stable-P2        charts: 2 zone(s), one marker per day with a rate, limits per day, p̄ line
+PASS  shifeng-stable-P2        incident review lists all 925 late responses
+PASS  shifeng-stable-P2        export: CSV identical to the imported file
+PASS  shifeng-stable-P2        no MOCK banner, no page errors
+PASS  shifeng-zone_shift-P1    import: page shows 12000 rows
+PASS  shifeng-zone_shift-P1    analysis, nothing reviewed: HTTP 200, identical to core
+PASS  shifeng-zone_shift-P1    analysis after confirming [A,B]: identical to core
+PASS  shifeng-zone_shift-P1    coverage shown: all 12000/0/12000, priority 6000/0/6000 (usable/excluded/total)
+PASS  shifeng-zone_shift-P1    formal signals listed: 10
+PASS  shifeng-zone_shift-P1    table: all 20 monitoring rows show core n/late/rate/limits/status
+PASS  shifeng-zone_shift-P1    charts: 2 zone(s), one marker per day with a rate, limits per day, p̄ line
+PASS  shifeng-zone_shift-P1    incident review lists all 1109 late responses
+PASS  shifeng-zone_shift-P1    export: CSV identical to the imported file
+PASS  shifeng-zone_shift-P1    no MOCK banner, no page errors
+PASS  shifeng-zone_shift-P2    import: page shows 12000 rows
+PASS  shifeng-zone_shift-P2    analysis, nothing reviewed: HTTP 200, identical to core
+PASS  shifeng-zone_shift-P2    analysis after confirming [A,B]: identical to core
+PASS  shifeng-zone_shift-P2    coverage shown: all 12000/0/12000, priority 6000/0/6000 (usable/excluded/total)
+PASS  shifeng-zone_shift-P2    formal signals listed: 0
+PASS  shifeng-zone_shift-P2    table: all 20 monitoring rows show core n/late/rate/limits/status
+PASS  shifeng-zone_shift-P2    charts: 2 zone(s), one marker per day with a rate, limits per day, p̄ line
+PASS  shifeng-zone_shift-P2    incident review lists all 925 late responses
+PASS  shifeng-zone_shift-P2    export: CSV identical to the imported file
+PASS  shifeng-zone_shift-P2    no MOCK banner, no page errors
+PASS  jingyao-edge-P1          import: page shows 5118 rows
+PASS  jingyao-edge-P1          analysis, nothing reviewed: HTTP 200, identical to core
+PASS  jingyao-edge-P1          analysis after confirming [EDGE]: identical to core
+PASS  jingyao-edge-P1          coverage shown: all 5107/11/5118, priority 5107/10/5117 (usable/excluded/total)
+PASS  jingyao-edge-P1          formal signals listed: 0
+PASS  jingyao-edge-P1          table: all 8 monitoring rows show core n/late/rate/limits/status
+PASS  jingyao-edge-P1          charts: 6 zone(s), one marker per day with a rate, limits per day, p̄ line
+PASS  jingyao-edge-P1          incident review lists all 1369 late responses
+PASS  jingyao-edge-P1          export: CSV identical to the imported file
+PASS  jingyao-edge-P1          no MOCK banner, no page errors
+PASS  shifeng-edge-P1          import: page shows 2934 rows
+PASS  shifeng-edge-P1          analysis, nothing reviewed: HTTP 200, identical to core
+PASS  shifeng-edge-P1          analysis after confirming [A]: identical to core
+PASS  shifeng-edge-P1          coverage shown: all 2922/12/2934, priority 2922/10/2932 (usable/excluded/total)
+PASS  shifeng-edge-P1          formal signals listed: 0
+PASS  shifeng-edge-P1          table: all 10 monitoring rows show core n/late/rate/limits/status
+PASS  shifeng-edge-P1          charts: 5 zone(s), one marker per day with a rate, limits per day, p̄ line
+PASS  shifeng-edge-P1          incident review lists all 491 late responses
+PASS  shifeng-edge-P1          export: CSV identical to the imported file
+PASS  shifeng-edge-P1          no MOCK banner, no page errors
+PASS  hayden-nyc-2             import: page shows 26209 rows
+PASS  hayden-nyc-2             analysis, nothing reviewed: HTTP 200, identical to core
+PASS  hayden-nyc-2             analysis after confirming [BROOKLYN,QUEENS]: identical to core
+PASS  hayden-nyc-2             coverage shown: all 26209/0/26209, priority 26209/0/26209 (usable/excluded/total)
+PASS  hayden-nyc-2             formal signals listed: 8
+PASS  hayden-nyc-2             table: all 82 monitoring rows show core n/late/rate/limits/status
+PASS  hayden-nyc-2             charts: 2 zone(s), one marker per day with a rate, limits per day, p̄ line
+PASS  hayden-nyc-2             incident review lists all 7515 late responses
+PASS  hayden-nyc-2             export: CSV identical to the imported file
+PASS  hayden-nyc-2             no MOCK banner, no page errors
+
+110/110 checks passed
+Note: shifeng-edge-P1 codebook lists B,C,NEW,SHORT as reviewed, but their baselines are not usable, so the page cannot confirm them (interfaces section 10); verdicts are unaffected.
